@@ -45,7 +45,7 @@ export const FavoritesPage: React.FC = () => {
     if (savedPrompts.length === 0) return;
     try {
       const header = [
-        'PROMPTVERSE AI - MY FAVORITES COLLECTION',
+        '[ FX PROMPTY ] - MY FAVORITES COLLECTION',
         '=========================================',
         `Exported on: ${new Date().toLocaleDateString()}`,
         `Total Prompts: ${savedPrompts.length}`,
@@ -73,7 +73,7 @@ export const FavoritesPage: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `promptverse-favorites-${Date.now()}.txt`;
+      link.download = `fx-prompty-favorites-${Date.now()}.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

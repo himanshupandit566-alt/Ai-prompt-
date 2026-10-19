@@ -7,8 +7,8 @@ import { PromptItem } from '../types/prompt';
 export function exportPromptToTxt(item: PromptItem): boolean {
   try {
     const lines: string[] = [
-      'PROMPTVERSE AI',
-      '==============',
+      'FX PROMPTY',
+      '==========',
       '',
       'Title:',
       item.title,
@@ -37,7 +37,7 @@ export function exportPromptToTxt(item: PromptItem): boolean {
     lines.push(item.tags.join(', '));
     lines.push('');
     lines.push('Application:');
-    lines.push('PromptVerse AI - Discover. Copy. Create.');
+    lines.push('FX Prompty - Discover. Copy. Create. (by Himanshu Pandey)');
     lines.push('');
 
     const content = lines.join('\r\n');
@@ -50,7 +50,7 @@ export function exportPromptToTxt(item: PromptItem): boolean {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '') || 'prompt';
 
-    const filename = `promptverse-${safeTitle}.txt`;
+    const filename = `fx-prompty-${safeTitle}.txt`;
 
     const link = document.createElement('a');
     link.href = url;

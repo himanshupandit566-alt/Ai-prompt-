@@ -6,8 +6,8 @@ const samplePrompt = INITIAL_PROMPTS[0];
 
 function generateExportContent(item: typeof samplePrompt) {
   const lines: string[] = [
-    'PROMPTVERSE AI',
-    '==============',
+    'FX PROMPTY',
+    '==========',
     '',
     'Title:',
     item.title,
@@ -36,7 +36,7 @@ function generateExportContent(item: typeof samplePrompt) {
   lines.push(item.tags.join(', '));
   lines.push('');
   lines.push('Application:');
-  lines.push('PromptVerse AI - Discover. Copy. Create.');
+  lines.push('FX Prompty - Discover. Copy. Create. (by Himanshu Pandey)');
   lines.push('');
 
   return lines.join('\r\n');
@@ -44,12 +44,12 @@ function generateExportContent(item: typeof samplePrompt) {
 
 const txt = generateExportContent(samplePrompt);
 
-console.assert(txt.startsWith('PROMPTVERSE AI\r\n==============\r\n\r\nTitle:\r\n'), 'Export format does not start with expected header');
+console.assert(txt.startsWith('FX PROMPTY\r\n==========\r\n\r\nTitle:\r\n'), 'Export format does not start with expected header');
 console.assert(txt.includes(`Title:\r\n${samplePrompt.title}`), 'Export missing title');
 console.assert(txt.includes(`Category:\r\n${samplePrompt.category}`), 'Export missing category');
 console.assert(txt.includes(`Aspect Ratio:\r\n${samplePrompt.aspectRatio}`), 'Export missing aspect ratio');
 console.assert(txt.includes(`PROMPT:\r\n${samplePrompt.prompt}`), 'Export missing full prompt');
-console.assert(txt.includes('Application:\r\nPromptVerse AI'), 'Export missing Application tag');
+console.assert(txt.includes('Application:\r\nFX Prompty'), 'Export missing Application tag');
 
 console.log('✓ Plain-text export structure verified against user specification.');
 console.log('Sample exported snippet:\n' + txt.slice(0, 220) + '...\n');

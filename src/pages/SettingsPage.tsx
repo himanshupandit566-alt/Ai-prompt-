@@ -140,7 +140,18 @@ export const SettingsPage: React.FC = () => {
           <div className="space-y-3 text-xs sm:text-sm">
             <div className="flex justify-between py-1.5 border-b border-slate-800/80">
               <span className="text-slate-400">App Name</span>
-              <span className="font-semibold text-slate-100">PromptVerse AI</span>
+              <span className="font-semibold text-slate-100">[ FX Prompty ]</span>
+            </div>
+            <div className="flex justify-between py-1.5 border-b border-slate-800/80">
+              <span className="text-slate-400">Creator</span>
+              <a
+                href="https://github.com/himanshupandit566-alt"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-purple-400 hover:underline"
+              >
+                Himanshu Pandey
+              </a>
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-800/80">
               <span className="text-slate-400">Tagline</span>
@@ -171,7 +182,7 @@ export const SettingsPage: React.FC = () => {
         <div className="bg-dark-900/50 border border-slate-800/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-slate-400">
           <ShieldCheck className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
           <p className="leading-relaxed">
-            PromptVerse AI runs securely in your client browser. No personal data, generation history, or saved favorites are transmitted to third-party tracking services. All prompts are copyable directly to your device clipboard.
+            [ FX Prompty ] runs securely in your client browser. Created with passion by Himanshu Pandey. No personal data, generation history, or saved favorites are transmitted to third-party tracking services.
           </p>
         </div>
       </div>

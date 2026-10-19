@@ -16,7 +16,7 @@ export const Footer: React.FC = () => {
                 </div>
               </div>
               <span className="font-extrabold text-lg text-white tracking-tight">
-                PromptVerse <span className="text-purple-400">AI</span>
+                [ FX <span className="text-purple-400">Prompty</span> ]
               </span>
             </Link>
             <p className="text-sm text-slate-400 max-w-sm leading-relaxed">
@@ -83,10 +83,20 @@ export const Footer: React.FC = () => {
 
         {/* Bottom copyright and disclaimer */}
         <div className="pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-          <p>© {new Date().getFullYear()} PromptVerse AI. All rights reserved.</p>
-          <div className="flex items-center gap-1">
-            <span>Built with precision & passion</span>
-            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 mx-0.5" />
+          <p>© {new Date().getFullYear()} [ FX Prompty ]. All rights reserved.</p>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span>Created with</span>
+            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 mx-0.5 animate-pulse" />
+            <span>by</span>
+            <a
+              href="https://github.com/himanshupandit566-alt"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-purple-400 hover:text-purple-300 font-semibold underline underline-offset-2 transition-colors"
+            >
+              Himanshu Pandey
+            </a>
+            <span className="text-slate-600">•</span>
             <span>for the creative AI community.</span>
           </div>
         </div>

@@ -38,22 +38,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSearch, initialQuery
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         {/* Pill Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-semibold mb-4 backdrop-blur-md">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-semibold mb-4 backdrop-blur-md">
           <Sparkles className="w-3.5 h-3.5 text-purple-400 animate-pulse-subtle" />
-          <span>Curated AI Prompts for Midjourney, DALL-E 3 & Flux</span>
+          <span>[ FX Prompty ] • Curated AI Prompts for Midjourney, DALL-E 3 & Flux</span>
         </div>
 
         {/* Heading */}
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-4 leading-tight">
-          Find Your Next <br className="hidden sm:inline" />
-          <span className="bg-gradient-to-r from-purple-400 via-indigo-300 to-blue-400 bg-clip-text text-transparent">
-            AI Masterpiece
+          [ FX <span className="bg-gradient-to-r from-purple-400 via-indigo-300 to-blue-400 bg-clip-text text-transparent">Prompty</span> ] <br className="hidden sm:inline" />
+          <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-200">
+            Find Your Next AI Masterpiece
           </span>
         </h1>
 
         {/* Subtitle */}
         <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto mb-8 font-normal leading-relaxed">
-          Explore stunning AI image prompts and recreate your favorite visual styles with one-tap copy.
+          Explore stunning AI image prompts on FX Prompty and recreate your favorite visual styles with one-tap copy.
         </p>
 
         {/* Search Bar */}
