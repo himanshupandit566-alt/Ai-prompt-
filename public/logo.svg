@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="pv-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="50%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="pv-sparkle" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <!-- Background Rounded Shield -->
+  <rect width="512" height="512" rx="128" fill="#0D0F17"/>
+  <rect x="8" y="8" width="496" height="496" rx="120" stroke="url(#pv-grad)" stroke-width="4" stroke-opacity="0.3"/>
+  <!-- Glowing Abstract 'P' & 'V' Aperture Prism -->
+  <g filter="url(#glow)">
+    <path d="M160 140 H280 C340 140 380 180 380 230 C380 280 340 320 280 320 H220 V380 H160 V140 Z" fill="url(#pv-grad)" fill-opacity="0.15" stroke="url(#pv-grad)" stroke-width="24" stroke-linejoin="round"/>
+    <path d="M220 200 H275 C305 200 325 215 325 235 C325 255 305 270 275 270 H220 V200 Z" fill="url(#pv-grad)"/>
+    <!-- Dynamic Light Ray / Sparkle -->
+    <path d="M350 160 L380 120 L410 160 L450 190 L410 220 L380 260 L350 220 L310 190 Z" fill="url(#pv-sparkle)"/>
+    <!-- Modern Aperture Dot -->
+    <circle cx="270" cy="370" r="14" fill="#3B82F6"/>
+    <circle cx="330" cy="370" r="18" fill="#8B5CF6"/>
+  </g>
+</svg>
