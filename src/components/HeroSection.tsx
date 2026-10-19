@@ -40,14 +40,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSearch, initialQuery
         {/* Pill Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-semibold mb-4 backdrop-blur-md">
           <Sparkles className="w-3.5 h-3.5 text-purple-400 animate-pulse-subtle" />
-          <span>[ FX Prompty ] • Curated AI Prompts for Midjourney, DALL-E 3 & Flux</span>
+          <span>FX Prompty • Curated AI Prompts for Midjourney, DALL-E 3 & Flux</span>
         </div>
 
         {/* Heading */}
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-4 leading-tight">
-          [ FX <span className="bg-gradient-to-r from-purple-400 via-indigo-300 to-blue-400 bg-clip-text text-transparent">Prompty</span> ] <br className="hidden sm:inline" />
-          <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-200">
-            Find Your Next AI Masterpiece
+          Find Your Next <br className="hidden sm:inline" />
+          <span className="bg-gradient-to-r from-purple-400 via-indigo-300 to-blue-400 bg-clip-text text-transparent">
+            AI Masterpiece
           </span>
         </h1>
 

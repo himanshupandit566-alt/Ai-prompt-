@@ -140,7 +140,7 @@ export const SettingsPage: React.FC = () => {
           <div className="space-y-3 text-xs sm:text-sm">
             <div className="flex justify-between py-1.5 border-b border-slate-800/80">
               <span className="text-slate-400">App Name</span>
-              <span className="font-semibold text-slate-100">[ FX Prompty ]</span>
+              <span className="font-semibold text-slate-100">FX Prompty</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-800/80">
               <span className="text-slate-400">Creator</span>
@@ -182,7 +182,7 @@ export const SettingsPage: React.FC = () => {
         <div className="bg-dark-900/50 border border-slate-800/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-slate-400">
           <ShieldCheck className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
           <p className="leading-relaxed">
-            [ FX Prompty ] runs securely in your client browser. Created with passion by Himanshu Pandey. No personal data, generation history, or saved favorites are transmitted to third-party tracking services.
+            FX Prompty runs securely in your client browser. Created by Himanshu Pandey. No personal data, generation history, or saved favorites are transmitted to third-party tracking services.
           </p>
         </div>
       </div>

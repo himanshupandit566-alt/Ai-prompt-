@@ -1,14 +1,14 @@
-# [ FX Prompty ]
+# FX Prompty
 
 > **Discover. Copy. Create.**
 > A modern, premium, production-ready AI Image Prompt Library for Midjourney, DALL-E 3, Flux.1, and Stable Diffusion XL.
-> Created with ❤️ by [Himanshu Pandey](https://github.com/himanshupandit566-alt)
+> Created by [Himanshu Pandey](https://github.com/himanshupandit566-alt)
 
 ---
 
 ## 🌟 Overview
 
-**[ FX Prompty ]** is a curated prompt inspiration library designed with a dark aesthetic, combining Pinterest-style visual discovery with a prompt management workflow.
+**FX Prompty** is a curated prompt inspiration library designed with a dark aesthetic, combining Pinterest-style visual discovery with a prompt management workflow.
 
 ### Key Capabilities
 - **Visual Discovery**: Pinterest-style responsive image grid with card aspect ratios, loading skeletons, and graceful fallbacks.

@@ -37,7 +37,7 @@ export const Navbar: React.FC = () => {
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-purple-300 bg-clip-text text-transparent">
-                [ FX <span className="text-purple-400 font-bold">Prompty</span> ]
+                FX <span className="text-purple-400 font-bold">Prompty</span>
               </span>
               <span className="text-[10px] text-slate-400 tracking-wider font-medium hidden sm:block">
                 Discover. Copy. Create.
@@ -114,9 +114,8 @@ export const Navbar: React.FC = () => {
               className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dark-900/90 border border-slate-800 text-xs text-slate-300 hover:text-white hover:border-purple-500/40 transition-all shadow-sm group"
               title="Himanshu Pandey's GitHub Profile"
             >
-              <span>Created with</span>
-              <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 group-hover:scale-110 transition-transform" />
-              <span>by <strong className="text-purple-400 font-semibold group-hover:underline">Himanshu Pandey</strong></span>
+              <span>Created by</span>
+              <strong className="text-purple-400 font-semibold group-hover:underline">Himanshu Pandey</strong>
             </a>
             {/* Mobile Search Toggle */}
             <button

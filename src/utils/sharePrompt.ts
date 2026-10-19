@@ -13,7 +13,7 @@ export interface ShareResult {
  */
 export async function sharePrompt(item: PromptItem): Promise<ShareResult> {
   const shareData: ShareData = {
-    title: `[ FX Prompty ]: ${item.title}`,
+    title: `FX Prompty: ${item.title}`,
     text: `"${item.title}" (${item.category})\n\nPrompt: ${item.prompt}`,
     url: window.location.href,
   };
@@ -41,7 +41,7 @@ export async function sharePrompt(item: PromptItem): Promise<ShareResult> {
 
   // Fallback: Copy the shareable text to clipboard
   const copied = await copyToClipboard(
-    `[ FX Prompty ] - ${item.title}\nCategory: ${item.category}\n\nPrompt:\n${item.prompt}\n\nExplore more at: ${window.location.origin}/prompt/${item.id}`
+    `FX Prompty - ${item.title}\nCategory: ${item.category}\n\nPrompt:\n${item.prompt}\n\nExplore more at: ${window.location.origin}/prompt/${item.id}`
   );
 
   if (copied) {
