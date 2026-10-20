@@ -35,6 +35,23 @@
   will-change: opacity, transform;
 }
 
+/* Modal Fast Pop In Animation (200ms) */
+@keyframes modalPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-pop {
+  animation: modalPopIn 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
 /* Modal Spring Entry Animation */
 @keyframes modalSpringIn {
   0% {

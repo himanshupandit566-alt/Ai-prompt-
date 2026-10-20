@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useFavorites } from '../context/FavoritesContext';
+import { playClickSound } from '../utils/sound';
 import {
   Camera,
   Calendar,
@@ -72,6 +73,19 @@ export const SettingsPage: React.FC = () => {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [policyModalOpen, setPolicyModalOpen] = useState<'privacy' | 'terms' | null>(null);
+
+  // Disable background page scrolling when any modal is open
+  const isAnyModalOpen = logoutModalOpen || deleteModalOpen || !!policyModalOpen;
+
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isAnyModalOpen]);
 
   // Handle Avatar Image Upload from Device Gallery
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -637,27 +651,58 @@ export const SettingsPage: React.FC = () => {
 
       {/* Log Out Confirmation Dialog */}
       {logoutModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0D0F17] border border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative modal-spring text-center">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center mx-auto mb-4">
-              <LogOut className="w-6 h-6" />
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              playClickSound();
+              setLogoutModalOpen(false);
+            }
+          }}
+          className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 select-none"
+        >
+          <div className="bg-[#0D0F17] border border-purple-500/30 rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.85)] relative modal-pop text-center">
+            {/* Top Close Button */}
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setLogoutModalOpen(false);
+              }}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+              title="Close modal"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Glowing Icon */}
+            <div className="w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(244,63,94,0.25)]">
+              <LogOut className="w-7 h-7" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">Are you sure you want to log out?</h3>
-            <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+
+            <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
+              Log Out of FX Prompty?
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-400 mb-6 leading-relaxed">
               Confirm karne par aapka active session clear ho jayega aur aap Welcome screen par redirect ho jayenge.
             </p>
+
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => setLogoutModalOpen(false)}
-                className="flex-1 py-2.5 rounded-xl bg-[#07080B] hover:bg-white/5 border border-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+                onClick={() => {
+                  playClickSound();
+                  setLogoutModalOpen(false);
+                }}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-dark-900 hover:bg-dark-850 border border-slate-700 text-slate-300 text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleConfirmLogout}
-                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-lg shadow-rose-600/30 cursor-pointer"
+                className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-xs sm:text-sm font-semibold shadow-[0_0_20px_rgba(225,29,72,0.4)] hover:shadow-[0_0_25px_rgba(225,29,72,0.6)] transition-all cursor-pointer"
               >
                 Yes, Log Out
               </button>
@@ -668,27 +713,53 @@ export const SettingsPage: React.FC = () => {
 
       {/* Delete Account Confirmation Dialog */}
       {deleteModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0D0F17] border border-rose-900/60 rounded-3xl p-6 max-w-md w-full shadow-2xl relative modal-spring text-center">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center justify-center mx-auto mb-4">
-              <AlertTriangle className="w-6 h-6" />
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              playClickSound();
+              setDeleteModalOpen(false);
+            }
+          }}
+          className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 select-none"
+        >
+          <div className="bg-[#0D0F17] border border-rose-900/60 rounded-3xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(0,0,0,0.85)] relative modal-pop text-center">
+            {/* Top Close Button */}
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setDeleteModalOpen(false);
+              }}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+              title="Close modal"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="w-14 h-14 rounded-2xl bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(244,63,94,0.25)]">
+              <AlertTriangle className="w-7 h-7" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">Delete Your Account?</h3>
-            <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+            <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Delete Your Account?</h3>
+            <p className="text-xs sm:text-sm text-slate-400 mb-6 leading-relaxed">
               This request permanently deletes your account and personal data in full compliance with Google Play Store data safety guidelines. This action cannot be undone.
             </p>
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => setDeleteModalOpen(false)}
-                className="flex-1 py-2.5 rounded-xl bg-[#07080B] border border-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+                onClick={() => {
+                  playClickSound();
+                  setDeleteModalOpen(false);
+                }}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-dark-900 hover:bg-dark-850 border border-slate-700 text-slate-300 text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
               >
                 Keep Account
               </button>
               <button
                 type="button"
                 onClick={handleConfirmDelete}
-                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-lg shadow-rose-600/40 cursor-pointer"
+                className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-xs sm:text-sm font-semibold shadow-[0_0_20px_rgba(225,29,72,0.4)] hover:shadow-[0_0_25px_rgba(225,29,72,0.6)] transition-all cursor-pointer"
               >
                 Permanently Delete
               </button>
@@ -699,11 +770,25 @@ export const SettingsPage: React.FC = () => {
 
       {/* Privacy Policy & Terms Modal */}
       {policyModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0D0F17] border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto shadow-2xl relative modal-spring">
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              playClickSound();
+              setPolicyModalOpen(null);
+            }
+          }}
+          className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 select-none"
+        >
+          <div className="bg-[#0D0F17] border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto shadow-[0_0_50px_rgba(0,0,0,0.85)] relative modal-pop">
             <button
-              onClick={() => setPolicyModalOpen(null)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setPolicyModalOpen(null);
+              }}
+              className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
