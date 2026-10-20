@@ -63,6 +63,9 @@ const getFirebaseFriendlyErrorMessage = (code: string, fallbackMessage?: string)
       return 'Popup browser dwara block ho gaya. Redirect mode se login kiya ja raha hai...';
     case 'auth/unauthorized-domain':
       return 'Ye domain Firebase Console me authorized nahi hai. Firebase Console -> Authentication -> Settings -> Authorized Domains me localhost aur apna Vercel domain add karein.';
+    case 'auth/api-key-not-valid':
+    case 'auth/invalid-api-key':
+      return 'Firebase API Key invalid hai. Kripya Firebase Console (Project Settings -> General) me jakar apna real "Web API Key" check karein aur .env me update karein.';
     case 'auth/network-request-failed':
       return 'Network issue hai. Kripya apna internet connection check karein.';
     default:
