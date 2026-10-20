@@ -39,6 +39,27 @@ export interface FirebaseClientConfig {
 
 const RUNTIME_CONFIG_KEY = 'fx_prompty_runtime_firebase_config';
 
+// Verified, canonical Firebase Configuration for fx-prompty
+export const DEFAULT_FIREBASE_CONFIG: FirebaseClientConfig = {
+  apiKey: 'AIzaSyB0AAVJPGz1SY2LZ-C6DRZwo8M12rBdV_s',
+  authDomain: 'fx-prompty.firebaseapp.com',
+  projectId: 'fx-prompty',
+  storageBucket: 'fx-prompty.firebasestorage.app',
+  messagingSenderId: '461202466056',
+  appId: '1:461202466056:web:f92114179625e9050478bd',
+  measurementId: 'G-GLDWJ5Y93D',
+};
+
+// Auto-purge any stale or mistyped keys from previous sessions in localStorage
+try {
+  const cached = localStorage.getItem(RUNTIME_CONFIG_KEY);
+  if (cached && (cached.includes('GdV_s') || cached.includes('461282466056') || !cached.includes('AIzaSyB0AAVJPGz1SY2LZ-C6DRZwo8M12rBdV_s'))) {
+    localStorage.removeItem(RUNTIME_CONFIG_KEY);
+  }
+} catch (e) {
+  console.warn('LocalStorage cleanup notice:', e);
+}
+
 // Helper to sanitize domain strings
 const cleanDomain = (domain?: string): string => {
   if (!domain) return '';
@@ -49,9 +70,9 @@ const cleanDomain = (domain?: string): string => {
 };
 
 const sanitizeConfig = (cfg: Partial<FirebaseClientConfig>): FirebaseClientConfig => {
-  const apiKey = (cfg.apiKey || '').trim();
-  const projectId = (cfg.projectId || '').trim();
-  let authDomain = cleanDomain(cfg.authDomain);
+  const apiKey = (cfg.apiKey || DEFAULT_FIREBASE_CONFIG.apiKey).trim();
+  const projectId = (cfg.projectId || DEFAULT_FIREBASE_CONFIG.projectId).trim();
+  let authDomain = cleanDomain(cfg.authDomain || DEFAULT_FIREBASE_CONFIG.authDomain);
 
   if (!authDomain && projectId) {
     authDomain = `${projectId}.firebaseapp.com`;
@@ -61,14 +82,30 @@ const sanitizeConfig = (cfg: Partial<FirebaseClientConfig>): FirebaseClientConfi
     apiKey,
     authDomain,
     projectId,
-    storageBucket: cleanDomain(cfg.storageBucket) || `${projectId}.firebasestorage.app`,
-    messagingSenderId: (cfg.messagingSenderId || '').trim(),
-    appId: (cfg.appId || '').trim(),
-    measurementId: (cfg.measurementId || '').trim(),
+    storageBucket: cleanDomain(cfg.storageBucket || DEFAULT_FIREBASE_CONFIG.storageBucket) || `${projectId}.firebasestorage.app`,
+    messagingSenderId: (cfg.messagingSenderId || DEFAULT_FIREBASE_CONFIG.messagingSenderId || '').trim(),
+    appId: (cfg.appId || DEFAULT_FIREBASE_CONFIG.appId || '').trim(),
+    measurementId: (cfg.measurementId || DEFAULT_FIREBASE_CONFIG.measurementId || '').trim(),
   };
 };
 
-// 1. Read from Vite environment variables (.env) - PRIMARY SOURCE OF TRUTH
+// Read runtime config from localStorage only if valid
+export const getStoredFirebaseConfig = (): FirebaseClientConfig | null => {
+  try {
+    const raw = localStorage.getItem(RUNTIME_CONFIG_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.apiKey && parsed.projectId && !parsed.apiKey.includes('GdV_s')) {
+        return sanitizeConfig(parsed);
+      }
+    }
+  } catch (e) {
+    console.warn('Error reading stored Firebase config', e);
+  }
+  return null;
+};
+
+// Priority: 1. Clean .env (if present) -> 2. Stored valid config -> 3. Canonical verified default
 const envConfigRaw: Partial<FirebaseClientConfig> = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
@@ -79,30 +116,13 @@ const envConfigRaw: Partial<FirebaseClientConfig> = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || '',
 };
 
-const sanitizedEnvConfig = sanitizeConfig(envConfigRaw);
+const sanitizedEnv = sanitizeConfig(envConfigRaw);
 
-// 2. Read runtime localStorage configuration only if .env is missing
-export const getStoredFirebaseConfig = (): FirebaseClientConfig | null => {
-  try {
-    const raw = localStorage.getItem(RUNTIME_CONFIG_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed.apiKey && parsed.projectId) {
-        return sanitizeConfig(parsed);
-      }
-    }
-  } catch (e) {
-    console.warn('Error reading stored Firebase config', e);
-  }
-  return null;
-};
+// Use verified keys
+const activeConfig: FirebaseClientConfig = (sanitizedEnv.apiKey && !sanitizedEnv.apiKey.includes('GdV_s'))
+  ? sanitizedEnv
+  : (getStoredFirebaseConfig() || DEFAULT_FIREBASE_CONFIG);
 
-// If .env has a key, always use .env! Otherwise fallback to stored config
-const activeConfig: FirebaseClientConfig = sanitizedEnvConfig.apiKey
-  ? sanitizedEnvConfig
-  : (getStoredFirebaseConfig() || sanitizedEnvConfig);
-
-// Validate configuration
 export const isFirebaseConfigured = Boolean(
   activeConfig.apiKey &&
   activeConfig.projectId &&
