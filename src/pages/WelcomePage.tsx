@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { Sparkles, ArrowRight, Zap, Flame, Compass, Wand2 } from 'lucide-react';
 
 export const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, loading } = useAuth();
+
+  // Auto-skip Welcome Screen if user is already logged in
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, loading, navigate]);
 
   const handleSkip = () => {
-    // Record that visitor has seen welcome onboarding
     try {
       localStorage.setItem('fx_prompty_welcome_dismissed', 'true');
     } catch (e) {
@@ -46,7 +54,7 @@ export const WelcomePage: React.FC = () => {
 
         <button
           onClick={handleSkip}
-          className="text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+          className="text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
         >
           Skip for now →
         </button>

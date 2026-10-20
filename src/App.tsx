@@ -30,7 +30,7 @@ const ScrollToTop: React.FC = () => {
   return null;
 };
 
-// Initial Onboarding Gateway: Automatically routes first-time unauthenticated visitors to /welcome
+// Initial Onboarding Gateway: Automatically manages persistent session routing
 const OnboardingGateway: React.FC = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -38,9 +38,18 @@ const OnboardingGateway: React.FC = () => {
 
   useEffect(() => {
     if (loading) return;
+
     try {
+      // 1. If user is logged in, automatically skip welcome and login screens straight to Home
+      if (isAuthenticated) {
+        if (pathname === '/welcome' || pathname === '/login') {
+          navigate('/', { replace: true });
+        }
+        return;
+      }
+
+      // 2. If user is not logged in and has not dismissed welcome, route to Welcome Screen
       const hasDismissed = localStorage.getItem('fx_prompty_welcome_dismissed');
-      // If user arrives at root without authentication and without previous skip, show Welcome
       if (!isAuthenticated && !hasDismissed && pathname === '/') {
         navigate('/welcome', { replace: true });
       }

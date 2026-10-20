@@ -6,6 +6,8 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   sendPasswordResetEmail,
   signOut,
   updateProfile,
@@ -25,15 +27,35 @@ import {
   deleteDoc
 } from 'firebase/firestore';
 
-// Firebase configuration from Vite environment variables
-// Add these in your .env or hosting environment variables:
-// VITE_FIREBASE_API_KEY=your_api_key
-// VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-// VITE_FIREBASE_PROJECT_ID=your_project_id
-// VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-// VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-// VITE_FIREBASE_APP_ID=your_app_id
-const firebaseConfig = {
+export interface FirebaseClientConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket?: string;
+  messagingSenderId?: string;
+  appId?: string;
+}
+
+const RUNTIME_CONFIG_KEY = 'fx_prompty_runtime_firebase_config';
+
+// 1. Check runtime localStorage configuration first (allows instant setup in browser)
+export const getStoredFirebaseConfig = (): FirebaseClientConfig | null => {
+  try {
+    const raw = localStorage.getItem(RUNTIME_CONFIG_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.apiKey && parsed.projectId) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn('Error reading stored Firebase config', e);
+  }
+  return null;
+};
+
+// 2. Fall back to Vite environment variables from .env
+const envConfig: FirebaseClientConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
@@ -42,28 +64,54 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
 };
 
-// Check if valid Firebase configuration is supplied
+const activeConfig: FirebaseClientConfig = getStoredFirebaseConfig() || envConfig;
+
+// Validate configuration
 export const isFirebaseConfigured = Boolean(
-  firebaseConfig.apiKey &&
-  firebaseConfig.projectId &&
-  !firebaseConfig.apiKey.includes('YOUR_')
+  activeConfig.apiKey &&
+  activeConfig.projectId &&
+  !activeConfig.apiKey.includes('YOUR_') &&
+  !activeConfig.apiKey.includes('AIzaSyYourApiKeyHere')
 );
 
 let app: FirebaseApp | undefined;
 let auth: Auth | undefined;
 let db: Firestore | undefined;
 const googleProvider = new GoogleAuthProvider();
+// Force Google to show account selection picker every time
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 if (isFirebaseConfigured) {
   try {
-    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+    app = getApps().length === 0 ? initializeApp(activeConfig) : getApp();
     auth = getAuth(app);
     db = getFirestore(app);
   } catch (err) {
-    console.warn('Firebase initialization error, running in local fallback mode:', err);
+    console.warn('Firebase initialization error:', err);
   }
 }
+
+// Function to save runtime Firebase config and re-initialize
+export const saveRuntimeFirebaseConfig = (config: FirebaseClientConfig): boolean => {
+  try {
+    if (!config.apiKey || !config.projectId) return false;
+    localStorage.setItem(RUNTIME_CONFIG_KEY, JSON.stringify(config));
+    window.location.reload();
+    return true;
+  } catch (e) {
+    console.error('Failed to save Firebase config', e);
+    return false;
+  }
+};
+
+export const clearRuntimeFirebaseConfig = () => {
+  try {
+    localStorage.removeItem(RUNTIME_CONFIG_KEY);
+    window.location.reload();
+  } catch (e) {
+    console.error(e);
+  }
+};
 
 export {
   app,
@@ -73,6 +121,8 @@ export {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   sendPasswordResetEmail,
   signOut,
   updateProfile,

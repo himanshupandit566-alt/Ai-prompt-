@@ -37,10 +37,9 @@ interface AuthContextType {
   deleteAccount: () => Promise<{ success: boolean; error?: string }>;
 }
 
-const AUTH_STORAGE_KEY = 'fx_prompty_current_user_v2';
-const USERS_DB_STORAGE_KEY = 'fx_prompty_registered_users_v2';
+const AUTH_STORAGE_KEY = 'fx_prompty_current_user_v3';
 
-// Helper to convert Firebase Auth error codes into friendly user messages
+// Helper to convert Firebase Auth error codes into clean user messages
 const getFirebaseFriendlyErrorMessage = (code: string, fallbackMessage?: string): string => {
   switch (code) {
     case 'auth/wrong-password':
@@ -56,35 +55,37 @@ const getFirebaseFriendlyErrorMessage = (code: string, fallbackMessage?: string)
     case 'auth/weak-password':
       return 'Password kam se kam 6 characters ka hona chahiye.';
     case 'auth/popup-closed-by-user':
-      return 'Google Sign-In process user dwara cancel kar diya gaya.';
+      return 'Google Sign-In cancel kar diya gaya. Dobara prayas karein.';
+    case 'auth/popup-blocked':
+      return 'Browser dwara Google popup block ho gaya. Kripya popups allow karein.';
     case 'auth/too-many-requests':
-      return 'Bohot saare galat attempts. Kripya thodi der baad dobara prayas karein.';
+      return 'Bohot saare requests aaye hain. Kripya thodi der baad dobara prayas karein.';
     case 'auth/network-request-failed':
-      return 'Network connection me samasya hai. Kripya internet check karein.';
+      return 'Network issue hai. Kripya apna internet connection check karein.';
+    case 'auth/unauthorized-domain':
+      return 'Ye domain Firebase Console me authorized nahi hai. Firebase Authentication -> Settings -> Authorized Domains me localhost/domain add karein.';
     default:
-      return fallbackMessage || 'Authentication me samasya aayi. Kripya dobara prayas karein.';
+      return fallbackMessage || 'Authentication me samasya aayi. Kripya dobara try karein.';
   }
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // User starts null (no hardcoded static dummy profile)
+  // Read initial user from persistent storage
   const [user, setUser] = useState<UserProfile | null>(() => {
     try {
       const saved = localStorage.getItem(AUTH_STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-      return null;
+      return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
     }
   });
 
-  const [loading, setLoading] = useState(false);
+  // Initial loading is true to allow Firebase onAuthStateChanged to resolve session
+  const [loading, setLoading] = useState(true);
 
-  // Sync current user state to persistent local session
+  // Sync active user state to persistent local session
   useEffect(() => {
     try {
       if (user) {
@@ -97,75 +98,138 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [user]);
 
-  // Firebase onAuthStateChanged listener when Firebase is configured
+  // ========================================================
+  // PERSISTENT SESSION LISTENER (Firebase onAuthStateChanged)
+  // ========================================================
   useEffect(() => {
-    if (!isFirebaseConfigured || !auth) return;
+    if (!isFirebaseConfigured || !auth) {
+      setLoading(false);
+      return;
+    }
 
+    // Listens to real-time Firebase Auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser) {
         try {
-          let profileData: Partial<UserProfile> = {};
+          let firestoreProfile: Partial<UserProfile> = {};
+
+          // Fetch real user document from Firestore (users/{uid})
           if (db) {
-            const userDocRef = doc(db, 'users', fbUser.uid);
-            const userDocSnap = await getDoc(userDocRef);
-            if (userDocSnap.exists()) {
-              profileData = userDocSnap.data() as Partial<UserProfile>;
-            } else {
-              // Create default document in Firestore
-              const initialData: UserProfile = {
-                uid: fbUser.uid,
-                displayName: fbUser.displayName || '',
-                email: fbUser.email || '',
-                photoURL: fbUser.photoURL || `https://api.dicebear.com/7.x/identicon/svg?seed=${fbUser.uid}`,
-                dob: '',
-                pushNotifications: true,
-                createdAt: new Date().toISOString().split('T')[0],
-                bio: 'AI prompt enthusiast on FX Prompty.',
-              };
-              await setDoc(userDocRef, initialData, { merge: true });
-              profileData = initialData;
+            try {
+              const userDocRef = doc(db, 'users', fbUser.uid);
+              const userDocSnap = await getDoc(userDocRef);
+
+              if (userDocSnap.exists()) {
+                firestoreProfile = userDocSnap.data() as Partial<UserProfile>;
+              } else {
+                // Initialize user document in Firestore on first login
+                const newDoc: UserProfile = {
+                  uid: fbUser.uid,
+                  displayName: fbUser.displayName || '',
+                  email: fbUser.email || '',
+                  photoURL: fbUser.photoURL || '',
+                  dob: '',
+                  pushNotifications: true,
+                  createdAt: new Date().toISOString().split('T')[0],
+                  bio: 'Creator on FX Prompty.',
+                };
+                await setDoc(userDocRef, newDoc, { merge: true });
+                firestoreProfile = newDoc;
+              }
+            } catch (err) {
+              console.warn('Firestore sync warning:', err);
             }
           }
 
-          setUser({
+          // Real user data extracted from Google/Firebase
+          const realProfile: UserProfile = {
             uid: fbUser.uid,
-            displayName: profileData.displayName || fbUser.displayName || '',
-            email: fbUser.email || '',
-            photoURL: profileData.photoURL || fbUser.photoURL || `https://api.dicebear.com/7.x/identicon/svg?seed=${fbUser.uid}`,
-            dob: profileData.dob || '',
-            pushNotifications: profileData.pushNotifications ?? true,
-            createdAt: profileData.createdAt || new Date().toISOString().split('T')[0],
-            bio: profileData.bio || 'AI prompt explorer on FX Prompty.',
-          });
+            displayName: firestoreProfile.displayName || fbUser.displayName || '',
+            email: fbUser.email || firestoreProfile.email || '',
+            photoURL: firestoreProfile.photoURL || fbUser.photoURL || '',
+            dob: firestoreProfile.dob || '',
+            pushNotifications: firestoreProfile.pushNotifications ?? true,
+            createdAt: firestoreProfile.createdAt || new Date().toISOString().split('T')[0],
+            bio: firestoreProfile.bio || 'Creator on FX Prompty.',
+          };
+
+          setUser(realProfile);
         } catch (err) {
-          console.error('Error fetching Firestore user record:', err);
+          console.error('Error resolving user profile:', err);
         }
+      } else {
+        // Firebase confirmed user is logged out
+        setUser(null);
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  // Helper to get local mock registered database
-  const getLocalUsers = (): Record<string, { profile: UserProfile; passwordHash: string }> => {
-    try {
-      const data = localStorage.getItem(USERS_DB_STORAGE_KEY);
-      return data ? JSON.parse(data) : {};
-    } catch {
-      return {};
-    }
-  };
+  // ========================================================
+  // 1. REAL GOOGLE SIGN-IN INTEGRATION (Native Dialog / Popup)
+  // ========================================================
+  const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
+    setLoading(true);
 
-  const saveLocalUsers = (users: Record<string, { profile: UserProfile; passwordHash: string }>) => {
+    if (!isFirebaseConfigured || !auth) {
+      setLoading(false);
+      return {
+        success: false,
+        error: 'FIREBASE_NOT_CONFIGURED',
+      };
+    }
+
     try {
-      localStorage.setItem(USERS_DB_STORAGE_KEY, JSON.stringify(users));
-    } catch (e) {
-      console.warn('Failed to save local users database', e);
+      // Pops up Google's Native Account Picker dialogue
+      const result = await signInWithPopup(auth, googleProvider);
+      const fbUser = result.user;
+
+      // Extract real details from Google Account
+      const realName = fbUser.displayName || '';
+      const realEmail = fbUser.email || '';
+      const realPhoto = fbUser.photoURL || '';
+
+      const userProfile: UserProfile = {
+        uid: fbUser.uid,
+        displayName: realName,
+        email: realEmail,
+        photoURL: realPhoto,
+        dob: '',
+        pushNotifications: true,
+        createdAt: new Date().toISOString().split('T')[0],
+        bio: 'Connected with Google on FX Prompty.',
+      };
+
+      // Save / Update in Cloud Firestore: users/{uid}
+      if (db) {
+        try {
+          const userDocRef = doc(db, 'users', fbUser.uid);
+          const snap = await getDoc(userDocRef);
+          if (snap.exists()) {
+            const existing = snap.data() as UserProfile;
+            userProfile.dob = existing.dob || '';
+            userProfile.pushNotifications = existing.pushNotifications ?? true;
+          }
+          await setDoc(userDocRef, userProfile, { merge: true });
+        } catch (err) {
+          console.warn('Firestore save notice:', err);
+        }
+      }
+
+      setUser(userProfile);
+      setLoading(false);
+      return { success: true };
+    } catch (err: any) {
+      setLoading(false);
+      const friendlyMessage = getFirebaseFriendlyErrorMessage(err.code, err.message);
+      return { success: false, error: friendlyMessage };
     }
   };
 
   // ========================================================
-  // 1. SIGN IN WITH EMAIL & PASSWORD
+  // 2. EMAIL & PASSWORD SIGN IN
   // ========================================================
   const signInWithEmail = async (
     email: string,
@@ -184,72 +248,51 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return { success: false, error: 'Kripya apna password enter karein.' };
     }
 
-    // A. Real Firebase Auth Flow
-    if (isFirebaseConfigured && auth) {
-      try {
-        const userCred = await signInWithEmailAndPassword(auth, cleanEmail, password);
-        const fbUser = userCred.user;
+    if (!isFirebaseConfigured || !auth) {
+      setLoading(false);
+      return {
+        success: false,
+        error: 'FIREBASE_NOT_CONFIGURED',
+      };
+    }
 
-        let profile: UserProfile = {
-          uid: fbUser.uid,
-          displayName: fbUser.displayName || '',
-          email: fbUser.email || cleanEmail,
-          photoURL: fbUser.photoURL || `https://api.dicebear.com/7.x/identicon/svg?seed=${fbUser.uid}`,
-          dob: '',
-          pushNotifications: true,
-          createdAt: new Date().toISOString().split('T')[0],
-          bio: 'AI prompt enthusiast on FX Prompty.',
-        };
+    try {
+      const userCred = await signInWithEmailAndPassword(auth, cleanEmail, password);
+      const fbUser = userCred.user;
 
-        if (db) {
-          try {
-            const userDocSnap = await getDoc(doc(db, 'users', fbUser.uid));
-            if (userDocSnap.exists()) {
-              profile = { ...profile, ...(userDocSnap.data() as Partial<UserProfile>) };
-            }
-          } catch (e) {
-            console.warn('Could not read user profile from firestore', e);
+      let profile: UserProfile = {
+        uid: fbUser.uid,
+        displayName: fbUser.displayName || '',
+        email: fbUser.email || cleanEmail,
+        photoURL: fbUser.photoURL || '',
+        dob: '',
+        pushNotifications: true,
+        createdAt: new Date().toISOString().split('T')[0],
+      };
+
+      if (db) {
+        try {
+          const snap = await getDoc(doc(db, 'users', fbUser.uid));
+          if (snap.exists()) {
+            profile = { ...profile, ...(snap.data() as Partial<UserProfile>) };
           }
+        } catch (e) {
+          console.warn(e);
         }
-
-        setUser(profile);
-        setLoading(false);
-        return { success: true };
-      } catch (err: any) {
-        setLoading(false);
-        const friendlyMessage = getFirebaseFriendlyErrorMessage(err.code, err.message);
-        return { success: false, error: friendlyMessage };
       }
-    }
 
-    // B. Local Responsive Fallback Flow (Identical real behavior)
-    await new Promise((res) => setTimeout(res, 500));
-    const localUsers = getLocalUsers();
-    const existing = localUsers[cleanEmail];
-
-    if (!existing) {
+      setUser(profile);
       setLoading(false);
-      return {
-        success: false,
-        error: 'Is email se koi account nahi mila. Kripya pehle Sign Up karein.',
-      };
-    }
-
-    if (existing.passwordHash !== password) {
+      return { success: true };
+    } catch (err: any) {
       setLoading(false);
-      return {
-        success: false,
-        error: 'Password galat hai. Kripya sahi password dalein.',
-      };
+      const friendlyMessage = getFirebaseFriendlyErrorMessage(err.code, err.message);
+      return { success: false, error: friendlyMessage };
     }
-
-    setUser(existing.profile);
-    setLoading(false);
-    return { success: true };
   };
 
   // ========================================================
-  // 2. SIGN UP WITH EMAIL, NAME & PASSWORD
+  // 3. EMAIL & PASSWORD SIGN UP
   // ========================================================
   const signUpWithEmail = async (
     displayName: string,
@@ -270,158 +313,53 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return { success: false, error: 'Password kam se kam 6 characters ka hona chahiye.' };
     }
 
-    // A. Real Firebase Flow
-    if (isFirebaseConfigured && auth) {
-      try {
-        const userCred = await createUserWithEmailAndPassword(auth, cleanEmail, password);
-        const fbUser = userCred.user;
-
-        const defaultAvatar = `https://api.dicebear.com/7.x/identicon/svg?seed=${cleanEmail}`;
-        await updateProfile(fbUser, {
-          displayName: cleanName,
-          photoURL: defaultAvatar,
-        });
-
-        const newProfile: UserProfile = {
-          uid: fbUser.uid,
-          displayName: cleanName,
-          email: cleanEmail,
-          photoURL: defaultAvatar,
-          dob: '',
-          pushNotifications: true,
-          createdAt: new Date().toISOString().split('T')[0],
-          bio: 'AI prompt enthusiast on FX Prompty.',
-        };
-
-        if (db) {
-          try {
-            await setDoc(doc(db, 'users', fbUser.uid), newProfile);
-          } catch (e) {
-            console.warn('Could not write new profile to firestore', e);
-          }
-        }
-
-        setUser(newProfile);
-        setLoading(false);
-        return { success: true };
-      } catch (err: any) {
-        setLoading(false);
-        const friendlyMessage = getFirebaseFriendlyErrorMessage(err.code, err.message);
-        return { success: false, error: friendlyMessage };
-      }
-    }
-
-    // B. Local Fallback Flow
-    await new Promise((res) => setTimeout(res, 600));
-    const localUsers = getLocalUsers();
-
-    if (localUsers[cleanEmail]) {
+    if (!isFirebaseConfigured || !auth) {
       setLoading(false);
       return {
         success: false,
-        error: 'Is email se pehle se account bana hua hai. Kripya Sign In karein.',
+        error: 'FIREBASE_NOT_CONFIGURED',
       };
     }
 
-    const uid = `usr-${Date.now()}`;
-    const newProfile: UserProfile = {
-      uid,
-      displayName: cleanName,
-      email: cleanEmail,
-      photoURL: `https://api.dicebear.com/7.x/identicon/svg?seed=${cleanEmail}`,
-      dob: '',
-      pushNotifications: true,
-      createdAt: new Date().toISOString().split('T')[0],
-      bio: 'AI prompt enthusiast on FX Prompty.',
-    };
+    try {
+      const userCred = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+      const fbUser = userCred.user;
 
-    localUsers[cleanEmail] = {
-      profile: newProfile,
-      passwordHash: password,
-    };
-    saveLocalUsers(localUsers);
+      await updateProfile(fbUser, {
+        displayName: cleanName,
+      });
 
-    setUser(newProfile);
-    setLoading(false);
-    return { success: true };
-  };
+      const newProfile: UserProfile = {
+        uid: fbUser.uid,
+        displayName: cleanName,
+        email: cleanEmail,
+        photoURL: fbUser.photoURL || '',
+        dob: '',
+        pushNotifications: true,
+        createdAt: new Date().toISOString().split('T')[0],
+        bio: 'AI prompt creator on FX Prompty.',
+      };
 
-  // ========================================================
-  // 3. 1-CLICK GOOGLE SIGN-IN
-  // ========================================================
-  const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
-    setLoading(true);
-
-    // A. Real Firebase Flow
-    if (isFirebaseConfigured && auth) {
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-        const fbUser = result.user;
-
-        let profile: UserProfile = {
-          uid: fbUser.uid,
-          displayName: fbUser.displayName || '',
-          email: fbUser.email || '',
-          photoURL: fbUser.photoURL || `https://api.dicebear.com/7.x/identicon/svg?seed=${fbUser.uid}`,
-          dob: '',
-          pushNotifications: true,
-          createdAt: new Date().toISOString().split('T')[0],
-          bio: 'Signed in with Google Account on FX Prompty.',
-        };
-
-        if (db) {
-          try {
-            const userDocSnap = await getDoc(doc(db, 'users', fbUser.uid));
-            if (userDocSnap.exists()) {
-              profile = { ...profile, ...(userDocSnap.data() as Partial<UserProfile>) };
-            } else {
-              await setDoc(doc(db, 'users', fbUser.uid), profile, { merge: true });
-            }
-          } catch (e) {
-            console.warn('Could not sync Google user profile with Firestore', e);
-          }
+      if (db) {
+        try {
+          await setDoc(doc(db, 'users', fbUser.uid), newProfile);
+        } catch (e) {
+          console.warn(e);
         }
-
-        setUser(profile);
-        setLoading(false);
-        return { success: true };
-      } catch (err: any) {
-        setLoading(false);
-        const friendlyMessage = getFirebaseFriendlyErrorMessage(err.code, err.message);
-        return { success: false, error: friendlyMessage };
       }
+
+      setUser(newProfile);
+      setLoading(false);
+      return { success: true };
+    } catch (err: any) {
+      setLoading(false);
+      const friendlyMessage = getFirebaseFriendlyErrorMessage(err.code, err.message);
+      return { success: false, error: friendlyMessage };
     }
-
-    // B. Local Responsive Fallback Flow (Simulates seamless 1-tap Google OAuth)
-    await new Promise((res) => setTimeout(res, 600));
-
-    // Dynamically retrieve or generate a Google account profile
-    const googleUid = `google-${Date.now().toString(36)}`;
-    const googleUser: UserProfile = {
-      uid: googleUid,
-      displayName: 'Google User',
-      email: `user.${googleUid.slice(-4)}@gmail.com`,
-      photoURL: `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80`,
-      dob: '',
-      pushNotifications: true,
-      createdAt: new Date().toISOString().split('T')[0],
-      bio: 'Connected via Google Account.',
-    };
-
-    const localUsers = getLocalUsers();
-    localUsers[googleUser.email] = {
-      profile: googleUser,
-      passwordHash: 'google_oauth_authorized',
-    };
-    saveLocalUsers(localUsers);
-
-    setUser(googleUser);
-    setLoading(false);
-    return { success: true };
   };
 
   // ========================================================
-  // 4. FORGOT PASSWORD / PASSWORD RESET EMAIL
+  // 4. PASSWORD RESET EMAIL
   // ========================================================
   const sendPasswordReset = async (email: string): Promise<{ success: boolean; error?: string }> => {
     setLoading(true);
@@ -432,27 +370,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return { success: false, error: 'Kripya ek valid email address enter karein.' };
     }
 
-    // A. Real Firebase Flow
-    if (isFirebaseConfigured && auth) {
-      try {
-        await sendPasswordResetEmail(auth, cleanEmail);
-        setLoading(false);
-        return { success: true };
-      } catch (err: any) {
-        setLoading(false);
-        const friendlyMessage = getFirebaseFriendlyErrorMessage(err.code, err.message);
-        return { success: false, error: friendlyMessage };
-      }
+    if (!isFirebaseConfigured || !auth) {
+      setLoading(false);
+      return {
+        success: false,
+        error: 'FIREBASE_NOT_CONFIGURED',
+      };
     }
 
-    // B. Local Fallback Flow
-    await new Promise((res) => setTimeout(res, 500));
-    setLoading(false);
-    return { success: true };
+    try {
+      await sendPasswordResetEmail(auth, cleanEmail);
+      setLoading(false);
+      return { success: true };
+    } catch (err: any) {
+      setLoading(false);
+      const friendlyMessage = getFirebaseFriendlyErrorMessage(err.code, err.message);
+      return { success: false, error: friendlyMessage };
+    }
   };
 
   // ========================================================
-  // 5. DYNAMIC UPDATE USER PROFILE (Firestore sync)
+  // 5. UPDATE USER PROFILE (Cloud Firestore users/{uid})
   // ========================================================
   const updateUserProfile = async (
     updates: Partial<UserProfile>
@@ -462,7 +400,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     setLoading(true);
 
-    // A. Real Firebase Update
     if (isFirebaseConfigured && auth?.currentUser) {
       try {
         const updateObj: { displayName?: string; photoURL?: string } = {};
@@ -477,20 +414,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           await setDoc(doc(db, 'users', user.uid), updates, { merge: true });
         }
       } catch (err: any) {
-        console.warn('Firebase profile update issue, falling back to local state:', err);
+        console.warn('Profile update notice:', err);
       }
-    }
-
-    // B. Local DB Sync
-    const localUsers = getLocalUsers();
-    if (user.email && localUsers[user.email]) {
-      localUsers[user.email].profile = { ...localUsers[user.email].profile, ...updates };
-      // If email was changed:
-      if (updates.email && updates.email !== user.email) {
-        localUsers[updates.email] = localUsers[user.email];
-        delete localUsers[user.email];
-      }
-      saveLocalUsers(localUsers);
     }
 
     setUser((prev) => (prev ? { ...prev, ...updates } : null));
@@ -499,7 +424,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   // ========================================================
-  // 6. CHANGE PASSWORD (with re-authentication)
+  // 6. CHANGE PASSWORD WITH RE-AUTHENTICATION
   // ========================================================
   const changePassword = async (
     currentPassword: string,
@@ -520,7 +445,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return { success: false, error: 'Naya password kam se kam 6 characters ka hona chahiye.' };
     }
 
-    // A. Real Firebase Re-auth and Update
     if (isFirebaseConfigured && auth?.currentUser && user.email) {
       try {
         const cred = EmailAuthProvider.credential(user.email, currentPassword);
@@ -537,27 +461,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     }
 
-    // B. Local Fallback Validation
-    await new Promise((res) => setTimeout(res, 500));
-    const localUsers = getLocalUsers();
-    const entry = localUsers[user.email];
-
-    if (entry && entry.passwordHash !== currentPassword) {
-      setLoading(false);
-      return { success: false, error: 'Current password galat hai.' };
-    }
-
-    if (entry) {
-      entry.passwordHash = newPassword;
-      saveLocalUsers(localUsers);
-    }
-
     setLoading(false);
     return { success: true };
   };
 
   // ========================================================
-  // 7. LOG OUT SESSION
+  // 7. CLEAN LOGOUT (Firebase SignOut + Session Reset)
   // ========================================================
   const logOut = async () => {
     setLoading(true);
@@ -570,6 +479,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     setUser(null);
     localStorage.removeItem(AUTH_STORAGE_KEY);
+    // Remove welcome dismiss flag so fresh login/welcome appears smoothly
+    localStorage.removeItem('fx_prompty_welcome_dismissed');
     setLoading(false);
   };
 
@@ -580,7 +491,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!user) return { success: false, error: 'No active user.' };
     setLoading(true);
 
-    // A. Real Firebase Delete
     if (isFirebaseConfigured && auth?.currentUser) {
       try {
         if (db) {
@@ -588,19 +498,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
         await deleteUser(auth.currentUser);
       } catch (err: any) {
-        console.warn('Firebase account deletion error:', err);
+        console.warn('Account deletion notice:', err);
       }
-    }
-
-    // B. Local storage deletion
-    const localUsers = getLocalUsers();
-    if (user.email && localUsers[user.email]) {
-      delete localUsers[user.email];
-      saveLocalUsers(localUsers);
     }
 
     setUser(null);
     localStorage.removeItem(AUTH_STORAGE_KEY);
+    localStorage.removeItem('fx_prompty_welcome_dismissed');
     setLoading(false);
     return { success: true };
   };

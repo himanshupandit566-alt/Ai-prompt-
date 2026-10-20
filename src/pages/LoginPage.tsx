@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useFavorites } from '../context/FavoritesContext';
+import { saveRuntimeFirebaseConfig } from '../firebase';
 import {
   Mail,
   Lock,
@@ -13,12 +14,13 @@ import {
   AlertCircle,
   CheckCircle2,
   X,
-  Compass
+  Compass,
+  Key
 } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { signInWithEmail, signUpWithEmail, signInWithGoogle, sendPasswordReset, loading } = useAuth();
+  const { user, isAuthenticated, signInWithEmail, signUpWithEmail, signInWithGoogle, sendPasswordReset, loading } = useAuth();
   const { showToast } = useFavorites();
 
   const [mode, setMode] = useState<'login' | 'signup'>('login');
@@ -39,6 +41,20 @@ export const LoginPage: React.FC = () => {
   const [resetEmail, setResetEmail] = useState('');
   const [resetSuccess, setResetSuccess] = useState(false);
   const [resetError, setResetError] = useState('');
+
+  // Firebase Setup Modal State (shown when Firebase config is missing)
+  const [firebaseConfigModal, setFirebaseConfigModal] = useState(false);
+  const [cfgApiKey, setCfgApiKey] = useState('');
+  const [cfgAuthDomain, setCfgAuthDomain] = useState('');
+  const [cfgProjectId, setCfgProjectId] = useState('');
+  const [cfgAppId, setCfgAppId] = useState('');
+
+  // Auto-skip Login Screen if user is already authenticated
+  useEffect(() => {
+    if (!loading && isAuthenticated && user) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, user, loading, navigate]);
 
   // Email format validator
   const isValidEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
@@ -88,7 +104,11 @@ export const LoginPage: React.FC = () => {
         showToast(`Account successfully ban gaya! Welcome ${displayName}! 🎉`, 'success');
         navigate('/');
       } else {
-        setErrorMessage(res.error || 'Sign Up me samasya aayi.');
+        if (res.error === 'FIREBASE_NOT_CONFIGURED') {
+          setFirebaseConfigModal(true);
+        } else {
+          setErrorMessage(res.error || 'Sign Up me samasya aayi.');
+        }
       }
     } else {
       const res = await signInWithEmail(email, password);
@@ -96,7 +116,11 @@ export const LoginPage: React.FC = () => {
         showToast('Successfully signed in! ✨', 'success');
         navigate('/');
       } else {
-        setErrorMessage(res.error || 'Sign In fail ho gaya.');
+        if (res.error === 'FIREBASE_NOT_CONFIGURED') {
+          setFirebaseConfigModal(true);
+        } else {
+          setErrorMessage(res.error || 'Sign In fail ho gaya.');
+        }
       }
     }
   };
@@ -108,10 +132,33 @@ export const LoginPage: React.FC = () => {
 
     const res = await signInWithGoogle();
     if (res.success) {
-      showToast('Google account se successfully sign in ho gaya! 🚀', 'success');
+      showToast('Google account se real data successfully link ho gaya! 🚀', 'success');
       navigate('/');
     } else {
-      setErrorMessage(res.error || 'Google Sign-In failed.');
+      if (res.error === 'FIREBASE_NOT_CONFIGURED') {
+        setFirebaseConfigModal(true);
+      } else {
+        setErrorMessage(res.error || 'Google Sign-In failed.');
+      }
+    }
+  };
+
+  const handleSaveFirebaseConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cfgApiKey.trim() || !cfgProjectId.trim()) {
+      showToast('API Key aur Project ID dono required hain', 'error');
+      return;
+    }
+
+    const saved = saveRuntimeFirebaseConfig({
+      apiKey: cfgApiKey.trim(),
+      authDomain: cfgAuthDomain.trim() || `${cfgProjectId.trim()}.firebaseapp.com`,
+      projectId: cfgProjectId.trim(),
+      appId: cfgAppId.trim(),
+    });
+
+    if (saved) {
+      showToast('Firebase Config saved! Reloading...', 'success');
     }
   };
 
@@ -133,7 +180,11 @@ export const LoginPage: React.FC = () => {
         setResetSuccess(false);
       }, 3000);
     } else {
-      setResetError(res.error || 'Password reset link bhejne me asafal.');
+      if (res.error === 'FIREBASE_NOT_CONFIGURED') {
+        setFirebaseConfigModal(true);
+      } else {
+        setResetError(res.error || 'Password reset link bhejne me asafal.');
+      }
     }
   };
 
@@ -211,7 +262,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setErrorMessage('')}
-                className="text-rose-400 hover:text-rose-200 ml-1"
+                className="text-rose-400 hover:text-rose-200 ml-1 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -381,15 +432,15 @@ export const LoginPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Single-Tap Google Sign-In Button */}
+          {/* Single-Tap Real Google Sign-In Button (Opens Google Native Account Picker) */}
           <button
             type="button"
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full py-3 px-4 rounded-xl bg-[#07080B] hover:bg-[#131622] border border-slate-800 hover:border-slate-700 text-slate-200 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-3 active:scale-98 shadow-sm cursor-pointer"
+            className="w-full py-3 px-4 rounded-xl bg-[#07080B] hover:bg-[#131622] border border-slate-800 hover:border-slate-700 text-slate-200 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-3 active:scale-98 shadow-sm cursor-pointer group"
           >
             {/* Official Google Vector Icon */}
-            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 shrink-0 group-hover:scale-105 transition-transform" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -414,7 +465,7 @@ export const LoginPage: React.FC = () => {
           <div className="mt-6 text-center">
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-purple-400 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-purple-400 transition-colors cursor-pointer"
             >
               <Compass className="w-3.5 h-3.5" />
               <span>Continue as Guest without account →</span>
@@ -429,7 +480,7 @@ export const LoginPage: React.FC = () => {
           <div className="bg-[#0D0F17] border border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative animate-in fade-in zoom-in-95">
             <button
               onClick={() => setForgotModalOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -470,6 +521,107 @@ export const LoginPage: React.FC = () => {
                 </button>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Firebase Setup Modal (Opens if Firebase keys are missing) */}
+      {firebaseConfigModal && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#0D0F17] border border-purple-500/40 rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl relative animate-in fade-in zoom-in-95">
+            <button
+              onClick={() => setFirebaseConfigModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/30 flex items-center justify-center mb-4">
+              <Key className="w-6 h-6" />
+            </div>
+
+            <h3 className="text-lg font-bold text-white mb-1">
+              Real Firebase Setup Required
+            </h3>
+            <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+              Real Google Sign-In aur Firestore sync chalane ke liye aapko apne Firebase Project ke credentials link karne honge.
+            </p>
+
+            <form onSubmit={handleSaveFirebaseConfig} className="space-y-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Firebase API Key (apiKey)
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={cfgApiKey}
+                  onChange={(e) => setCfgApiKey(e.target.value)}
+                  placeholder="AIzaSy..."
+                  className="w-full px-3.5 py-2 bg-[#07080B] border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Project ID (projectId)
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={cfgProjectId}
+                  onChange={(e) => setCfgProjectId(e.target.value)}
+                  placeholder="e.g. fx-prompty-ai"
+                  className="w-full px-3.5 py-2 bg-[#07080B] border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Auth Domain (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={cfgAuthDomain}
+                  onChange={(e) => setCfgAuthDomain(e.target.value)}
+                  placeholder="fx-prompty-ai.firebaseapp.com"
+                  className="w-full px-3.5 py-2 bg-[#07080B] border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  App ID (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={cfgAppId}
+                  onChange={(e) => setCfgAppId(e.target.value)}
+                  placeholder="1:123456789:web:abcdef..."
+                  className="w-full px-3.5 py-2 bg-[#07080B] border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500 font-mono"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFirebaseConfigModal(false)}
+                  className="px-4 py-2 rounded-xl bg-[#07080B] hover:bg-white/5 border border-slate-800 text-xs font-semibold text-slate-400 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-purple-600/30 cursor-pointer"
+                >
+                  Save &amp; Connect Real Firebase
+                </button>
+              </div>
+            </form>
+
+            <div className="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-400">
+              💡 Ya fir project root me <code>.env</code> file banakar <code>VITE_FIREBASE_API_KEY</code> aur <code>VITE_FIREBASE_PROJECT_ID</code> enter kar dein.
+            </div>
           </div>
         </div>
       )}
