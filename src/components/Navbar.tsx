@@ -135,7 +135,7 @@ export const Navbar: React.FC = () => {
             {/* Favorites Icon (Hidden on mobile <640px where BottomNav has Favorites) */}
             <Link
               to="/favorites"
-              onClick={() => playPopSound(0.06)}
+              onClick={() => playPopSound()}
               className={`hidden sm:flex relative p-2 rounded-xl transition-all shrink-0 ${
                 isActive('/favorites')
                   ? 'bg-rose-500/15 text-rose-400'

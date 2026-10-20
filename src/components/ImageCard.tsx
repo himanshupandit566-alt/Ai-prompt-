@@ -20,12 +20,12 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    playPopSound(0.06);
+    playPopSound();
     toggleFavorite(prompt.id);
   };
 
   const handleCardClick = () => {
-    playClickSound(0.04);
+    playClickSound();
   };
 
   // Determine aspect ratio class

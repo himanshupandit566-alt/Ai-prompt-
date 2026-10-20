@@ -171,7 +171,7 @@ export const PromptDetailPage: React.FC = () => {
           {/* Favorite Toggle */}
           <button
             onClick={() => {
-              playPopSound(0.06);
+              playPopSound();
               toggleFavorite(prompt.id);
             }}
             aria-label={favorited ? 'Remove from favorites' : 'Save to favorites'}
@@ -201,7 +201,7 @@ export const PromptDetailPage: React.FC = () => {
             {/* Click to Expand Button */}
             <button
               onClick={() => {
-                playPopSound(0.05);
+                playPopSound();
                 setImageModalOpen(true);
               }}
               title="View full resolution"

@@ -1,5 +1,5 @@
-// Web Audio API Synthesis - Universal UI Audio Feedback
-// Generates subtle, modern click/pop sounds without any external audio file dependency
+// Web Audio API Synthesis - Universal High-Volume UI Audio Feedback
+// Generates loud, crisp, tactile click/pop sounds without any external audio file dependency
 
 let audioCtx: AudioContext | null = null;
 
@@ -22,74 +22,81 @@ const getAudioContext = (): AudioContext | null => {
 };
 
 /**
- * Subtle, modern UI click sound (12ms micro-tick)
- * Perfect for buttons, navigation tabs, cards
+ * Punchy, high-volume modern UI mechanical click sound (~35ms)
+ * Audible & tactile on phone and laptop speakers
  */
-export const playClickSound = (volume: number = 0.04) => {
+export const playClickSound = (volume: number = 0.35) => {
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
 
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    const now = ctx.currentTime;
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(850, now);
-    osc.frequency.exponentialRampToValueAtTime(320, now + 0.018);
-
-    gain.gain.setValueAtTime(volume, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.018);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start(now);
-    osc.stop(now + 0.02);
-  } catch (e) {
-    // Audio synthesis fallback (silent fail)
-  }
-};
-
-/**
- * Soft modern bubble pop sound (22ms)
- * Perfect for modal opens, favorite toggles, and tab switches
- */
-export const playPopSound = (volume: number = 0.05) => {
-  try {
-    const ctx = getAudioContext();
-    if (!ctx) return;
+    // Apply master amplification so even legacy 0.04-0.06 calls are punchy and loud
+    const effectiveVolume = Math.max(volume >= 0.2 ? volume : volume * 7, 0.35);
 
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     const now = ctx.currentTime;
     osc.type = 'triangle';
-    osc.frequency.setValueAtTime(450, now);
-    osc.frequency.exponentialRampToValueAtTime(820, now + 0.025);
+    osc.frequency.setValueAtTime(1200, now);
+    osc.frequency.exponentialRampToValueAtTime(380, now + 0.035);
 
-    gain.gain.setValueAtTime(volume, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.025);
+    gain.gain.setValueAtTime(effectiveVolume, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
 
     osc.start(now);
-    osc.stop(now + 0.03);
+    osc.stop(now + 0.04);
   } catch (e) {
     // Silent fail
   }
 };
 
 /**
- * Subtle high-tech chime sound for success actions (like prompt copy)
+ * Rich, high-volume modern bubble pop sound (~45ms)
+ * Perfect for modal opens, favorite toggles, and tab switches
  */
-export const playSuccessChime = (volume: number = 0.05) => {
+export const playPopSound = (volume: number = 0.38) => {
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
 
+    const effectiveVolume = Math.max(volume >= 0.2 ? volume : volume * 7, 0.38);
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
     const now = ctx.currentTime;
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(480, now);
+    osc.frequency.exponentialRampToValueAtTime(1050, now + 0.042);
+
+    gain.gain.setValueAtTime(effectiveVolume, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.05);
+  } catch (e) {
+    // Silent fail
+  }
+};
+
+/**
+ * Vibrant high-tech chime sound for success actions (like prompt copy)
+ */
+export const playSuccessChime = (volume: number = 0.32) => {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const effectiveVolume = Math.max(volume >= 0.2 ? volume : volume * 6, 0.32);
+    const now = ctx.currentTime;
+
     const osc1 = ctx.createOscillator();
     const osc2 = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -97,20 +104,20 @@ export const playSuccessChime = (volume: number = 0.05) => {
     osc1.type = 'sine';
     osc2.type = 'sine';
 
-    osc1.frequency.setValueAtTime(880, now); // A5
-    osc2.frequency.setValueAtTime(1320, now + 0.03); // E6
+    osc1.frequency.setValueAtTime(987.77, now); // B5
+    osc2.frequency.setValueAtTime(1479.98, now + 0.04); // F#6
 
-    gain.gain.setValueAtTime(volume, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+    gain.gain.setValueAtTime(effectiveVolume, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
 
     osc1.connect(gain);
     osc2.connect(gain);
     gain.connect(ctx.destination);
 
     osc1.start(now);
-    osc1.stop(now + 0.04);
-    osc2.start(now + 0.03);
-    osc2.stop(now + 0.09);
+    osc1.stop(now + 0.06);
+    osc2.start(now + 0.04);
+    osc2.stop(now + 0.14);
   } catch (e) {
     // Silent fail
   }

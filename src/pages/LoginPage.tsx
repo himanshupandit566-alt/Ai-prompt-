@@ -245,7 +245,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                playPopSound(0.05);
+                playPopSound();
                 setMode('login');
                 setErrorMessage('');
                 setEmailError('');
@@ -262,7 +262,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                playPopSound(0.05);
+                playPopSound();
                 setMode('signup');
                 setErrorMessage('');
                 setEmailError('');
