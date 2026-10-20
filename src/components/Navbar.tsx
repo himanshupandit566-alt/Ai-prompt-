@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Heart, Settings, PlusCircle, Compass, Grid, Sparkles, X, LogIn } from 'lucide-react';
+import { Search, Heart, Settings, PlusCircle, Compass, Grid, X, LogIn } from 'lucide-react';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
 import { playClickSound, playPopSound } from '../utils/sound';
+import { AppLogo } from './AppLogo';
 
 export const Navbar: React.FC = () => {
   const { favorites } = useFavorites();
@@ -33,11 +34,7 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo & Brand */}
           <Link to="/" className="flex items-center gap-3 shrink-0 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 p-0.5 shadow-glow-purple group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-dark-950 rounded-[10px] flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-purple-400" />
-              </div>
-            </div>
+            <AppLogo size={40} className="group-hover:scale-105 transition-transform" />
             <div className="flex flex-col">
               <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-purple-300 bg-clip-text text-transparent">
                 FX <span className="text-purple-400 font-bold">Prompty</span>

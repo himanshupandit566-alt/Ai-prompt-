@@ -28,11 +28,13 @@ import {
 interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
+  isGuest: boolean;
   loading: boolean;
   isFirebaseActive: boolean;
-  signInWithEmail: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signUpWithEmail: (displayName: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
+  continueAsGuest: () => void;
+  signInWithEmail: (email: string, password: string) => Promise<{ success: boolean; error?: string; code?: string }>;
+  signUpWithEmail: (displayName: string, email: string, password: string) => Promise<{ success: boolean; error?: string; code?: string }>;
+  signInWithGoogle: () => Promise<{ success: boolean; error?: string; code?: string }>;
   sendPasswordReset: (email: string) => Promise<{ success: boolean; error?: string }>;
   updateUserProfile: (updates: Partial<UserProfile>) => Promise<{ success: boolean; error?: string }>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
@@ -41,15 +43,17 @@ interface AuthContextType {
 }
 
 const AUTH_STORAGE_KEY = 'fx_prompty_current_user_v3';
+const GUEST_STORAGE_KEY = 'fx_prompty_is_guest';
 
 // Helper to convert Firebase Auth error codes into clear user messages
 const getFirebaseFriendlyErrorMessage = (code: string, fallbackMessage?: string): string => {
   switch (code) {
     case 'auth/wrong-password':
+      return 'Galat password! Dobara check karein.';
+    case 'auth/user-not-found':
     case 'auth/invalid-credential':
     case 'auth/invalid-login-credentials':
-    case 'auth/user-not-found':
-      return 'Account not found or invalid credentials! Pehle Sign Up karein, uske baad Sign In karein.';
+      return "Yeh account exist nahi karta! Pehle 'Sign Up' tab par jakar register karein.";
     case 'auth/email-already-in-use':
       return 'Is email se pehle se account bana hua hai. Kripya Sign In karein.';
     case 'auth/invalid-email':
@@ -84,6 +88,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return null;
     }
   });
+
+  // Guest session flag
+  const [isGuest, setIsGuest] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(GUEST_STORAGE_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const continueAsGuest = () => {
+    setIsGuest(true);
+    try {
+      localStorage.setItem(GUEST_STORAGE_KEY, 'true');
+    } catch (e) {
+      console.warn('Failed to save guest session flag', e);
+    }
+  };
 
   // Loading state remains true until Firebase onAuthStateChanged confirms the session
   const [loading, setLoading] = useState(true);
@@ -144,6 +166,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     setUser(realProfile);
+    setIsGuest(false);
+    try {
+      localStorage.removeItem(GUEST_STORAGE_KEY);
+    } catch (e) {
+      // ignore
+    }
     return realProfile;
   };
 
@@ -241,7 +269,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signInWithEmail = async (
     email: string,
     password: string
-  ): Promise<{ success: boolean; error?: string }> => {
+  ): Promise<{ success: boolean; error?: string; code?: string }> => {
     setLoading(true);
     const cleanEmail = email.trim().toLowerCase();
 
@@ -266,12 +294,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const userCred = await signInWithEmailAndPassword(auth, cleanEmail, password);
       await syncFirebaseUserToState(userCred.user);
+      setIsGuest(false);
+      try {
+        localStorage.removeItem(GUEST_STORAGE_KEY);
+      } catch (e) {
+        // ignore
+      }
       setLoading(false);
       return { success: true };
     } catch (err: any) {
       setLoading(false);
       const friendlyMessage = getFirebaseFriendlyErrorMessage(err.code, err.message);
-      return { success: false, error: friendlyMessage };
+      return { success: false, error: friendlyMessage, code: err.code };
     }
   };
 
@@ -333,6 +367,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       setUser(newProfile);
+      setIsGuest(false);
+      try {
+        localStorage.removeItem(GUEST_STORAGE_KEY);
+      } catch (e) {
+        // ignore
+      }
       setLoading(false);
       return { success: true };
     } catch (err: any) {
@@ -462,7 +502,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     }
     setUser(null);
+    setIsGuest(false);
     localStorage.removeItem(AUTH_STORAGE_KEY);
+    localStorage.removeItem(GUEST_STORAGE_KEY);
     localStorage.removeItem('fx_prompty_welcome_dismissed');
     setLoading(false);
   };
@@ -486,7 +528,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     setUser(null);
+    setIsGuest(false);
     localStorage.removeItem(AUTH_STORAGE_KEY);
+    localStorage.removeItem(GUEST_STORAGE_KEY);
     localStorage.removeItem('fx_prompty_welcome_dismissed');
     setLoading(false);
     return { success: true };
@@ -497,8 +541,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       value={{
         user,
         isAuthenticated: !!user,
+        isGuest,
         loading,
         isFirebaseActive: isFirebaseConfigured,
+        continueAsGuest,
         signInWithEmail,
         signUpWithEmail,
         signInWithGoogle,

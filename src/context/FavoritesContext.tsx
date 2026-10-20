@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { PromptItem } from '../types/prompt';
 import { INITIAL_PROMPTS } from '../data/prompts';
+import { useAuth } from './AuthContext';
 
 interface ToastInfo {
   id: string;
@@ -21,21 +22,16 @@ interface FavoritesContextType {
   removeToast: (id: string) => void;
 }
 
-const FAVORITES_STORAGE_KEY = 'promptverse_favorites_v1';
 const CUSTOM_PROMPTS_STORAGE_KEY = 'promptverse_custom_prompts_v1';
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
 
 export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Favorites persistence
-  const [favorites, setFavorites] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem(FAVORITES_STORAGE_KEY);
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const { user } = useAuth();
+  const currentUid = user?.uid || null;
+
+  // Favorites state isolated per authenticated user
+  const [favorites, setFavorites] = useState<string[]>([]);
 
   // Custom user-added prompts
   const [customPrompts, setCustomPrompts] = useState<PromptItem[]>(() => {
@@ -50,13 +46,49 @@ export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({ children 
   // Toasts
   const [toasts, setToasts] = useState<ToastInfo[]>([]);
 
+  // Purge any legacy global dummy favorites key to prevent data leakage across accounts
   useEffect(() => {
     try {
-      localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
+      localStorage.removeItem('promptverse_favorites_v1');
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Sync favorites when active user changes (Login / Logout / Account Switch)
+  useEffect(() => {
+    if (!currentUid) {
+      // Logout or unauthenticated: clean previous user's state so count starts at '0'
+      setFavorites([]);
+      return;
+    }
+
+    // Authenticated user: load from their unique storage key `favorites_${currentUser.uid}`
+    const userStorageKey = `favorites_${currentUid}`;
+    try {
+      const saved = localStorage.getItem(userStorageKey);
+      if (saved) {
+        setFavorites(JSON.parse(saved));
+      } else {
+        // Fresh user account starts with 0 items
+        setFavorites([]);
+      }
+    } catch (e) {
+      console.warn('Failed to load favorites for user:', currentUid, e);
+      setFavorites([]);
+    }
+  }, [currentUid]);
+
+  // Persist user-specific favorites whenever favorites array updates
+  useEffect(() => {
+    if (!currentUid) return;
+    try {
+      const userStorageKey = `favorites_${currentUid}`;
+      localStorage.setItem(userStorageKey, JSON.stringify(favorites));
     } catch (e) {
       console.warn('Failed to save favorites to localStorage', e);
     }
-  }, [favorites]);
+  }, [favorites, currentUid]);
 
   useEffect(() => {
     try {
@@ -81,6 +113,11 @@ export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({ children 
   const isFavorite = (id: string) => favorites.includes(id);
 
   const toggleFavorite = (id: string) => {
+    if (!currentUid) {
+      showToast('Favorites save karne ke liye pehle Sign In karein! 🔒', 'warning');
+      return;
+    }
+
     setFavorites((prev) => {
       if (prev.includes(id)) {
         showToast('Removed from Favorites', 'info');

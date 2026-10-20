@@ -167,6 +167,9 @@ export const SettingsPage: React.FC = () => {
   // Clear Saved Favorites Cache
   const handleClearFavorites = () => {
     if (window.confirm('Kya aap sabhi saved favorites clear karna chahte hain?')) {
+      if (user?.uid) {
+        localStorage.removeItem(`favorites_${user.uid}`);
+      }
       localStorage.removeItem('promptverse_favorites_v1');
       window.location.reload();
     }

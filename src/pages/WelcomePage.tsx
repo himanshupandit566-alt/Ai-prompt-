@@ -3,26 +3,24 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Sparkles, ArrowRight, Zap, Flame, Compass, Wand2 } from 'lucide-react';
 import { playClickSound } from '../utils/sound';
+import { AppLogo } from '../components/AppLogo';
 
 export const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isGuest, continueAsGuest, loading } = useAuth();
 
-  // Auto-skip Welcome Screen if user is already logged in
+  // Auto-skip Welcome Screen if user is already logged in or has active guest session
   useEffect(() => {
-    if (!loading && isAuthenticated) {
+    if (!loading && (isAuthenticated || isGuest)) {
       navigate('/', { replace: true });
     }
-  }, [isAuthenticated, loading, navigate]);
+  }, [isAuthenticated, isGuest, loading, navigate]);
 
+  // 'Skip for now' & 'Explore as Guest': sets isGuest flag and immediately navigates to Home
   const handleSkip = () => {
     playClickSound();
-    try {
-      localStorage.setItem('fx_prompty_welcome_dismissed', 'true');
-    } catch (e) {
-      console.warn(e);
-    }
-    navigate('/');
+    continueAsGuest();
+    navigate('/', { replace: true });
   };
 
   const handleGetStarted = () => {
@@ -45,16 +43,13 @@ export const WelcomePage: React.FC = () => {
       {/* Top Header / Skip Link */}
       <header className="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 p-0.5 shadow-[0_0_20px_rgba(139,92,246,0.6)] group-hover:scale-105 transition-transform">
-            <div className="w-full h-full bg-[#0D0F17] rounded-[14px] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-purple-400" />
-            </div>
-          </div>
+          <AppLogo size={38} className="group-hover:scale-105 transition-transform" />
           <span className="font-extrabold text-base tracking-tight text-white">
             FX <span className="text-purple-400">Prompty</span>
           </span>
         </Link>
 
+        {/* Top 'Skip for now' button */}
         <button
           onClick={handleSkip}
           className="text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
@@ -67,15 +62,14 @@ export const WelcomePage: React.FC = () => {
       <main className="relative z-10 max-w-xl mx-auto px-6 py-6 flex-1 flex flex-col items-center justify-center text-center">
         {/* Top Attractive AI Visual Illustration & Neon Floating Elements */}
         <div className="relative mb-8 w-full flex items-center justify-center">
-          {/* Central Holographic Neon Emblem */}
-          <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-500 p-1 shadow-[0_0_40px_rgba(139,92,246,0.5)] animate-pulse-subtle flex items-center justify-center">
-            <div className="w-full h-full bg-[#0D0F17] rounded-[22px] flex flex-col items-center justify-center p-3 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 to-transparent pointer-events-none" />
-              <Sparkles className="w-12 h-12 text-purple-400 drop-shadow-[0_0_18px_rgba(168,85,247,0.8)]" />
-              <span className="text-[10px] font-bold text-slate-300 mt-1 uppercase tracking-widest">
-                AI Engine
-              </span>
-            </div>
+          {/* Central Modern Vector Emblem with Neon Glow */}
+          <div className="relative flex items-center justify-center group animate-pulse-subtle">
+            <div className="absolute -inset-4 bg-purple-600/25 rounded-3xl blur-2xl group-hover:bg-purple-600/40 transition-all duration-700 pointer-events-none" />
+            <AppLogo
+              size={120}
+              showGlow={true}
+              className="relative z-10 drop-shadow-[0_0_35px_rgba(168,85,247,0.6)]"
+            />
           </div>
 
           {/* Floating Pill Preview 1: Left */}
@@ -154,7 +148,7 @@ export const WelcomePage: React.FC = () => {
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
 
-          {/* Skip / Guest Option */}
+          {/* Bottom 'Explore as Guest (Skip for now)' Button */}
           <button
             onClick={handleSkip}
             className="w-full py-3 px-4 rounded-xl text-slate-400 hover:text-white text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"

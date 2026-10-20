@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
+import { AppLogo } from './AppLogo';
 
 export const Footer: React.FC = () => {
   return (
@@ -9,12 +9,8 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand Info */}
           <div className="md:col-span-2 space-y-3">
-            <Link to="/" className="flex items-center gap-2.5 group inline-block">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 p-0.5 flex items-center justify-center">
-                <div className="w-full h-full bg-dark-950 rounded-[10px] flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                </div>
-              </div>
+            <Link to="/" className="flex items-center gap-2.5 group inline-flex">
+              <AppLogo size={34} className="group-hover:scale-105 transition-transform" />
               <span className="font-extrabold text-lg text-white tracking-tight">
                 FX <span className="text-purple-400">Prompty</span>
               </span>

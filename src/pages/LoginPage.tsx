@@ -4,13 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { saveRuntimeFirebaseConfig } from '../firebase';
 import { playClickSound, playPopSound } from '../utils/sound';
+import { AppLogo } from '../components/AppLogo';
 import {
   Mail,
   Lock,
   User,
   Eye,
   EyeOff,
-  Sparkles,
   ArrowRight,
   AlertCircle,
   CheckCircle2,
@@ -21,7 +21,16 @@ import {
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated, signInWithEmail, signUpWithEmail, signInWithGoogle, sendPasswordReset, loading } = useAuth();
+  const {
+    user,
+    isAuthenticated,
+    continueAsGuest,
+    signInWithEmail,
+    signUpWithEmail,
+    signInWithGoogle,
+    sendPasswordReset,
+    loading
+  } = useAuth();
   const { showToast } = useFavorites();
 
   const [mode, setMode] = useState<'login' | 'signup'>('login');
@@ -120,8 +129,12 @@ export const LoginPage: React.FC = () => {
       } else {
         if (res.error === 'FIREBASE_NOT_CONFIGURED') {
           setFirebaseConfigModal(true);
+        } else if (res.code === 'auth/wrong-password' || res.error?.includes('Galat password')) {
+          setErrorMessage('Galat password! Dobara check karein.');
         } else {
-          setErrorMessage('Account not found or invalid credentials! Pehle Sign Up karein, uske baad Sign In karein.');
+          setErrorMessage(
+            res.error || "Yeh account exist nahi karta! Pehle 'Sign Up' tab par jakar register karein."
+          );
         }
       }
     }
@@ -198,12 +211,8 @@ export const LoginPage: React.FC = () => {
 
       {/* Brand Logo Header */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center mb-6">
-        <Link to="/" className="inline-flex items-center gap-2.5 group">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 p-0.5 shadow-[0_0_25px_rgba(139,92,246,0.5)] group-hover:scale-105 transition-transform">
-            <div className="w-full h-full bg-[#0D0F17] rounded-[14px] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-purple-400" />
-            </div>
-          </div>
+        <Link to="/" className="inline-flex items-center gap-3 group">
+          <AppLogo size={46} className="group-hover:scale-105 transition-transform" />
           <span className="font-extrabold text-2xl tracking-tight text-white">
             FX <span className="text-purple-400">Prompty</span>
           </span>
@@ -485,13 +494,18 @@ export const LoginPage: React.FC = () => {
 
           {/* Skip link */}
           <div className="mt-6 text-center">
-            <Link
-              to="/"
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                continueAsGuest();
+                navigate('/');
+              }}
               className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-purple-400 transition-colors cursor-pointer"
             >
               <Compass className="w-3.5 h-3.5" />
               <span>Continue as Guest without account →</span>
-            </Link>
+            </button>
           </div>
         </div>
       </div>

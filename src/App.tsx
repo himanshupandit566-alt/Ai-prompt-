@@ -36,7 +36,7 @@ const ScrollToTop: React.FC = () => {
 const OnboardingGateway: React.FC = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isGuest, loading } = useAuth();
 
   useEffect(() => {
     if (loading) return;
@@ -49,11 +49,19 @@ const OnboardingGateway: React.FC = () => {
       return;
     }
 
-    // 2. Unauthenticated user: App open hote hi sabse pehle 'Get Started' landing screen open ho
-    if (!isAuthenticated && pathname === '/') {
+    // 2. Guest session: Allow navigating anywhere without forcing back to welcome screen
+    if (isGuest) {
+      if (pathname === '/welcome') {
+        navigate('/', { replace: true });
+      }
+      return;
+    }
+
+    // 3. Unauthenticated first-time user: App open hote hi sabse pehle 'Get Started' landing screen open ho
+    if (!isAuthenticated && !isGuest && pathname === '/') {
       navigate('/welcome', { replace: true });
     }
-  }, [isAuthenticated, loading, pathname, navigate]);
+  }, [isAuthenticated, isGuest, loading, pathname, navigate]);
 
   return null;
 };
@@ -102,14 +110,14 @@ const AppContent: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <FavoritesProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <FavoritesProvider>
         <BrowserRouter>
           <ScrollToTop />
           <AppContent />
         </BrowserRouter>
-      </AuthProvider>
-    </FavoritesProvider>
+      </FavoritesProvider>
+    </AuthProvider>
   );
 };
 

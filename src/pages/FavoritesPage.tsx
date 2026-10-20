@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useFavorites } from '../context/FavoritesContext';
+import { useAuth } from '../context/AuthContext';
 import { copyToClipboard } from '../utils/clipboard';
 import { exportPromptToTxt } from '../utils/exportPrompt';
 import {
@@ -17,6 +18,7 @@ import {
 
 export const FavoritesPage: React.FC = () => {
   const { favorites, allPrompts, toggleFavorite, showToast } = useFavorites();
+  const { isAuthenticated } = useAuth();
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Match saved IDs to prompt objects
@@ -215,15 +217,36 @@ export const FavoritesPage: React.FC = () => {
             Your creative collection starts here.
           </h2>
           <p className="text-sm text-slate-400 mb-8 leading-relaxed max-w-md mx-auto">
-            Save prompts you love and find them anytime. Copy, export, and manage your custom prompts across sessions.
+            {!isAuthenticated
+              ? 'Sign in to save prompts to your personal collection, sync them across devices, and export them anytime.'
+              : 'Save prompts you love and find them anytime. Copy, export, and manage your custom prompts across sessions.'}
           </p>
-          <Link
-            to="/explore"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-glow-purple transition-all"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Explore Prompts Now</span>
-          </Link>
+          {!isAuthenticated ? (
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-glow-purple transition-all"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Sign In to Save Favorites</span>
+              </Link>
+              <Link
+                to="/explore"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-dark-850 hover:bg-dark-800 border border-slate-700 text-slate-300 font-semibold text-sm transition-all"
+              >
+                <Compass className="w-4 h-4" />
+                <span>Explore Prompts</span>
+              </Link>
+            </div>
+          ) : (
+            <Link
+              to="/explore"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-glow-purple transition-all"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Explore Prompts Now</span>
+            </Link>
+          )}
         </div>
       )}
     </div>
