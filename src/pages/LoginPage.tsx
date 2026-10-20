@@ -117,8 +117,12 @@ export const LoginPage: React.FC = () => {
       } else {
         if (res.error === 'FIREBASE_NOT_CONFIGURED') {
           setFirebaseConfigModal(true);
+        } else if (res.code === 'auth/operation-not-allowed') {
+          setErrorMessage('Email/Password registration Firebase Console me enabled nahi hai. Kripya Firebase Console > Authentication > Sign-in method me jakar "Email/Password" enable karein, ya fir Google se 1-click Sign In karein.');
+        } else if (res.code === 'auth/email-already-in-use') {
+          setErrorMessage('Is email se pehle se account bana hua hai. Kripya Sign In karein.');
         } else {
-          setErrorMessage(res.error || 'Sign Up me samasya aayi.');
+          setErrorMessage(res.error || 'Kuch galat hua. Kripya punah prayas karein.');
         }
       }
     } else {
@@ -129,11 +133,17 @@ export const LoginPage: React.FC = () => {
       } else {
         if (res.error === 'FIREBASE_NOT_CONFIGURED') {
           setFirebaseConfigModal(true);
-        } else if (res.code === 'auth/wrong-password' || res.error?.includes('Galat password')) {
-          setErrorMessage('Galat password! Dobara check karein.');
+        } else if (res.code === 'auth/operation-not-allowed') {
+          setErrorMessage('Email/Password sign-in Firebase Console me enabled nahi hai. Kripya Firebase Console > Authentication > Sign-in method me jakar "Email/Password" enable karein, ya fir Google se 1-click Sign In karein.');
+        } else if (res.code === 'auth/user-not-found') {
+          setErrorMessage('Account nahi mila, please sign up karein (Sign up please)');
+        } else if (res.code === 'auth/wrong-password') {
+          setErrorMessage('Galat password ya email!');
+        } else if (res.code === 'auth/invalid-credential' || res.code === 'auth/invalid-login-credentials') {
+          setErrorMessage('Galat password ya email! Pehle check karein ya Sign Up karein.');
         } else {
           setErrorMessage(
-            res.error || "Yeh account exist nahi karta! Pehle 'Sign Up' tab par jakar register karein."
+            res.error || 'Kuch galat hua. Kripya punah prayas karein.'
           );
         }
       }
@@ -270,32 +280,48 @@ export const LoginPage: React.FC = () => {
 
           {/* Strict Clear Red Alert Box */}
           {errorMessage && (
-            <div className="mb-5 p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-rose-200 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 modal-spring shadow-lg shadow-rose-950/30">
-              <div className="flex items-start gap-2.5 flex-1">
-                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                <div className="font-medium leading-relaxed">{errorMessage}</div>
+            <div className="mb-5 p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-rose-200 text-xs flex flex-col gap-2.5 modal-spring shadow-lg shadow-rose-950/30">
+              <div className="flex items-start justify-between gap-2.5">
+                <div className="flex items-start gap-2.5 flex-1">
+                  <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                  <div className="font-medium leading-relaxed">{errorMessage}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setErrorMessage('')}
+                  className="text-rose-400 hover:text-rose-200 p-0.5 cursor-pointer shrink-0"
+                  title="Close alert"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
               </div>
-              <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-                {mode === 'login' && (
+
+              {/* Action Buttons inside Alert */}
+              <div className="flex flex-wrap items-center justify-end gap-2 pt-1 border-t border-rose-500/20">
+                {/* Google Sign In Quick Action if Email/Password is disabled in Firebase */}
+                {errorMessage.includes('Firebase Console me enabled nahi hai') && (
+                  <button
+                    type="button"
+                    onClick={handleGoogleSignIn}
+                    className="px-3 py-1.5 rounded-lg bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>Continue with Google (1-Tap) →</span>
+                  </button>
+                )}
+
+                {/* Sign Up switch action */}
+                {(mode === 'login' && (errorMessage.includes('Sign up') || errorMessage.includes('sign up') || errorMessage.includes('exist nahi karta'))) && (
                   <button
                     type="button"
                     onClick={() => {
                       setMode('signup');
                       setErrorMessage('');
                     }}
-                    className="px-2.5 py-1 rounded-lg bg-rose-500/25 hover:bg-rose-500/35 text-rose-200 font-semibold text-[11px] border border-rose-500/35 transition-all cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg bg-rose-500/25 hover:bg-rose-500/35 text-rose-200 font-semibold text-xs border border-rose-500/35 transition-all cursor-pointer"
                   >
                     Pehle Sign Up Karein →
                   </button>
                 )}
-                <button
-                  type="button"
-                  onClick={() => setErrorMessage('')}
-                  className="text-rose-400 hover:text-rose-200 p-0.5 cursor-pointer"
-                  title="Close alert"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
               </div>
             </div>
           )}

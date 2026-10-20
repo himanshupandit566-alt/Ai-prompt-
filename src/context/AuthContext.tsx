@@ -35,7 +35,7 @@ interface AuthContextType {
   signInWithEmail: (email: string, password: string) => Promise<{ success: boolean; error?: string; code?: string }>;
   signUpWithEmail: (displayName: string, email: string, password: string) => Promise<{ success: boolean; error?: string; code?: string }>;
   signInWithGoogle: () => Promise<{ success: boolean; error?: string; code?: string }>;
-  sendPasswordReset: (email: string) => Promise<{ success: boolean; error?: string }>;
+  sendPasswordReset: (email: string) => Promise<{ success: boolean; error?: string; code?: string }>;
   updateUserProfile: (updates: Partial<UserProfile>) => Promise<{ success: boolean; error?: string }>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
   logOut: () => Promise<void>;
@@ -48,12 +48,15 @@ const GUEST_STORAGE_KEY = 'fx_prompty_is_guest';
 // Helper to convert Firebase Auth error codes into clear user messages
 const getFirebaseFriendlyErrorMessage = (code: string, fallbackMessage?: string): string => {
   switch (code) {
-    case 'auth/wrong-password':
-      return 'Galat password! Dobara check karein.';
+    case 'auth/operation-not-allowed':
+      return 'Email/Password sign-in Firebase Console me enabled nahi hai. Kripya Firebase Console > Authentication > Sign-in method me jakar "Email/Password" enable karein, ya fir Google se 1-click Sign In karein.';
     case 'auth/user-not-found':
+      return 'Account nahi mila, please sign up karein (Sign up please)';
+    case 'auth/wrong-password':
+      return 'Galat password ya email!';
     case 'auth/invalid-credential':
     case 'auth/invalid-login-credentials':
-      return "Yeh account exist nahi karta! Pehle 'Sign Up' tab par jakar register karein.";
+      return 'Galat password ya email! Pehle check karein ya Sign Up karein.';
     case 'auth/email-already-in-use':
       return 'Is email se pehle se account bana hua hai. Kripya Sign In karein.';
     case 'auth/invalid-email':
@@ -72,7 +75,11 @@ const getFirebaseFriendlyErrorMessage = (code: string, fallbackMessage?: string)
     case 'auth/network-request-failed':
       return 'Network issue hai. Kripya apna internet connection check karein.';
     default:
-      return fallbackMessage || 'Authentication me samasya aayi. Kripya dobara try karein.';
+      // Never show raw technical "Firebase: Error (...)"
+      if (fallbackMessage && !fallbackMessage.toLowerCase().includes('firebase') && !fallbackMessage.includes('auth/')) {
+        return fallbackMessage;
+      }
+      return 'Kuch galat hua. Kripya punah prayas karein.';
   }
 };
 
@@ -215,7 +222,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // ========================================================
   // 1. REAL GOOGLE SIGN-IN (Popup with Automatic Redirect Fallback)
   // ========================================================
-  const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
+  const signInWithGoogle = async (): Promise<{ success: boolean; error?: string; code?: string }> => {
     setLoading(true);
 
     if (!isFirebaseConfigured || !auth) {
@@ -259,7 +266,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       setLoading(false);
       const friendlyMessage = getFirebaseFriendlyErrorMessage(err.code, err.message);
-      return { success: false, error: friendlyMessage };
+      return { success: false, error: friendlyMessage, code: err.code };
     }
   };
 
@@ -316,7 +323,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     displayName: string,
     email: string,
     password: string
-  ): Promise<{ success: boolean; error?: string }> => {
+  ): Promise<{ success: boolean; error?: string; code?: string }> => {
     setLoading(true);
     const cleanEmail = email.trim().toLowerCase();
     const cleanName = displayName.trim();
@@ -378,14 +385,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (err: any) {
       setLoading(false);
       const friendlyMessage = getFirebaseFriendlyErrorMessage(err.code, err.message);
-      return { success: false, error: friendlyMessage };
+      return { success: false, error: friendlyMessage, code: err.code };
     }
   };
 
   // ========================================================
   // 4. PASSWORD RESET EMAIL
   // ========================================================
-  const sendPasswordReset = async (email: string): Promise<{ success: boolean; error?: string }> => {
+  const sendPasswordReset = async (email: string): Promise<{ success: boolean; error?: string; code?: string }> => {
     setLoading(true);
     const cleanEmail = email.trim().toLowerCase();
 
@@ -409,7 +416,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (err: any) {
       setLoading(false);
       const friendlyMessage = getFirebaseFriendlyErrorMessage(err.code, err.message);
-      return { success: false, error: friendlyMessage };
+      return { success: false, error: friendlyMessage, code: err.code };
     }
   };
 

@@ -6,6 +6,7 @@ import { Navbar } from './components/Navbar';
 import { BottomNav } from './components/BottomNav';
 import { Footer } from './components/Footer';
 import { ToastContainer } from './components/Toast';
+import { SplashScreen } from './components/SplashScreen';
 
 // Pages
 import { HomePage } from './pages/HomePage';
@@ -69,6 +70,14 @@ const OnboardingGateway: React.FC = () => {
 // Layout Manager with Smooth Slide & Fade Page Transition & Glassmorphism
 const AppContent: React.FC = () => {
   const { pathname } = useLocation();
+  const { loading, isAuthenticated, isGuest } = useAuth();
+
+  // 1. Splash Screen: When authentication status is being checked (loading === true),
+  // show high-tech dark-neon splash screen. This eliminates the flash of Home Screen before Welcome Screen.
+  if (loading) {
+    return <SplashScreen />;
+  }
+
   const isImmersiveScreen = pathname === '/welcome' || pathname === '/login';
 
   return (
@@ -82,7 +91,12 @@ const AppContent: React.FC = () => {
       <main className={`flex-1 ${isImmersiveScreen ? '' : 'pb-20 md:pb-0'}`}>
         <div key={pathname} className="page-transition">
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route
+              path="/"
+              element={
+                !isAuthenticated && !isGuest ? <WelcomePage /> : <HomePage />
+              }
+            />
             <Route path="/welcome" element={<WelcomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/explore" element={<ExplorePage />} />
