@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useFavorites } from '../context/FavoritesContext';
@@ -646,11 +647,11 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {/* ========================================================= */}
-      {/* CONFIRMATION MODALS */}
+      {/* CONFIRMATION MODALS (Rendered via Portal to <body> for true viewport centering) */}
       {/* ========================================================= */}
 
       {/* Log Out Confirmation Dialog */}
-      {logoutModalOpen && (
+      {logoutModalOpen && typeof document !== 'undefined' && createPortal(
         <div
           role="dialog"
           aria-modal="true"
@@ -660,9 +661,12 @@ export const SettingsPage: React.FC = () => {
               setLogoutModalOpen(false);
             }
           }}
-          className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 select-none"
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none"
         >
-          <div className="bg-[#0D0F17] border border-purple-500/30 rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.85)] relative modal-pop text-center">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#0D0F17] border border-purple-500/40 rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-[0_0_60px_rgba(0,0,0,0.95)] text-center relative animate-in fade-in zoom-in-95 duration-200"
+          >
             {/* Top Close Button */}
             <button
               type="button"
@@ -676,18 +680,22 @@ export const SettingsPage: React.FC = () => {
               <X className="w-4 h-4" />
             </button>
 
-            {/* Glowing Icon */}
-            <div className="w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(244,63,94,0.25)]">
+            {/* Red Glowing Icon */}
+            <div className="w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/25 flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(244,63,94,0.3)]">
               <LogOut className="w-7 h-7" />
             </div>
 
+            {/* Heading */}
             <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
-              Log Out of FX Prompty?
+              Log Out?
             </h3>
-            <p className="text-xs sm:text-sm text-slate-400 mb-6 leading-relaxed">
-              Confirm karne par aapka active session clear ho jayega aur aap Welcome screen par redirect ho jayenge.
+
+            {/* Message */}
+            <p className="text-xs sm:text-sm text-slate-300 mb-6 leading-relaxed">
+              Kya aap sach me FX Prompty se log out karna chahte hain?
             </p>
 
+            {/* Action Buttons */}
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -708,11 +716,12 @@ export const SettingsPage: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Delete Account Confirmation Dialog */}
-      {deleteModalOpen && (
+      {deleteModalOpen && typeof document !== 'undefined' && createPortal(
         <div
           role="dialog"
           aria-modal="true"
@@ -722,9 +731,12 @@ export const SettingsPage: React.FC = () => {
               setDeleteModalOpen(false);
             }
           }}
-          className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 select-none"
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none"
         >
-          <div className="bg-[#0D0F17] border border-rose-900/60 rounded-3xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(0,0,0,0.85)] relative modal-pop text-center">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#0D0F17] border border-rose-900/60 rounded-3xl p-6 max-w-md w-full shadow-[0_0_60px_rgba(0,0,0,0.95)] text-center relative animate-in fade-in zoom-in-95 duration-200"
+          >
             {/* Top Close Button */}
             <button
               type="button"
@@ -765,11 +777,12 @@ export const SettingsPage: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Privacy Policy & Terms Modal */}
-      {policyModalOpen && (
+      {policyModalOpen && typeof document !== 'undefined' && createPortal(
         <div
           role="dialog"
           aria-modal="true"
@@ -779,9 +792,12 @@ export const SettingsPage: React.FC = () => {
               setPolicyModalOpen(null);
             }
           }}
-          className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 select-none"
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none"
         >
-          <div className="bg-[#0D0F17] border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto shadow-[0_0_50px_rgba(0,0,0,0.85)] relative modal-pop">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#0D0F17] border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto shadow-[0_0_60px_rgba(0,0,0,0.95)] relative animate-in fade-in zoom-in-95 duration-200"
+          >
             <button
               type="button"
               onClick={() => {
@@ -838,13 +854,14 @@ export const SettingsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setPolicyModalOpen(null)}
-                className="px-4 py-2 rounded-xl bg-purple-600 text-white font-semibold text-xs cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs transition-colors cursor-pointer"
               >
                 Close
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

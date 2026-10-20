@@ -31,8 +31,7 @@
 }
 
 .page-transition {
-  animation: pageSlideFade 300ms cubic-bezier(0.25, 1, 0.5, 1) forwards;
-  will-change: opacity, transform;
+  animation: pageSlideFade 280ms cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 /* Modal Fast Pop In Animation (200ms) */
