@@ -27,7 +27,7 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-dark-950/80 backdrop-blur-xl border-b border-slate-800/80 transition-all">
+    <header className="sticky top-0 z-40 w-full glass-nav transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo & Brand */}
@@ -109,15 +109,17 @@ export const Navbar: React.FC = () => {
 
           {/* Actions: Search (Mobile), Creator Profile, Favorites, Settings */}
           <div className="flex items-center gap-2">
+            {/* Stylized Creator Attribution Badge */}
             <a
               href="https://github.com/himanshupandit566-alt"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dark-900/90 border border-slate-800 text-xs text-slate-300 hover:text-white hover:border-purple-500/40 transition-all shadow-sm group"
-              title="Himanshu Pandey's GitHub Profile"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dark-900/90 hover:bg-purple-950/30 border border-purple-500/30 hover:border-purple-400 text-xs text-slate-300 hover:text-white transition-all shadow-[0_0_15px_rgba(139,92,246,0.18)] group"
+              title="Created by Himanshu Pandey"
             >
-              <span>Created by</span>
-              <strong className="text-purple-400 font-semibold group-hover:underline">Himanshu Pandey</strong>
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+              <span className="hidden sm:inline text-slate-400">Created by</span>
+              <strong className="text-purple-300 font-semibold group-hover:underline">Himanshu Pandey</strong>
             </a>
             {/* Mobile Search Toggle */}
             <button

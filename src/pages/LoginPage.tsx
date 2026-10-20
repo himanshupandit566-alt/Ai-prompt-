@@ -119,7 +119,7 @@ export const LoginPage: React.FC = () => {
         if (res.error === 'FIREBASE_NOT_CONFIGURED') {
           setFirebaseConfigModal(true);
         } else {
-          setErrorMessage(res.error || 'Sign In fail ho gaya.');
+          setErrorMessage('Password wrong or account not found! First sign up and then sign in.');
         }
       }
     }
@@ -256,16 +256,33 @@ export const LoginPage: React.FC = () => {
 
           {/* Strict Clear Red Alert Box */}
           {errorMessage && (
-            <div className="mb-5 p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-rose-200 text-xs flex items-start gap-2.5 animate-in fade-in shadow-lg shadow-rose-950/20">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-              <div className="flex-1 font-medium leading-relaxed">{errorMessage}</div>
-              <button
-                type="button"
-                onClick={() => setErrorMessage('')}
-                className="text-rose-400 hover:text-rose-200 ml-1 cursor-pointer"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
+            <div className="mb-5 p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-rose-200 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 modal-spring shadow-lg shadow-rose-950/30">
+              <div className="flex items-start gap-2.5 flex-1">
+                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                <div className="font-medium leading-relaxed">{errorMessage}</div>
+              </div>
+              <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                {mode === 'login' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode('signup');
+                      setErrorMessage('');
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-rose-500/25 hover:bg-rose-500/35 text-rose-200 font-semibold text-[11px] border border-rose-500/35 transition-all cursor-pointer"
+                  >
+                    Sign Up Now →
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setErrorMessage('')}
+                  className="text-rose-400 hover:text-rose-200 p-0.5 cursor-pointer"
+                  title="Close alert"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           )}
 

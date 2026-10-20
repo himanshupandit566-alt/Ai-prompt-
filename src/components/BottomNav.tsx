@@ -15,7 +15,7 @@ export const BottomNav: React.FC = () => {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-dark-950/95 backdrop-blur-xl border-t border-slate-800/80 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-bottom-bar pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2">
       <nav className="flex items-center justify-around px-2">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -25,7 +25,7 @@ export const BottomNav: React.FC = () => {
               to={item.to}
               end={item.exact}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all relative ${
+                `flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all relative ${
                   isActive
                     ? 'text-purple-400 font-semibold'
                     : 'text-slate-400 hover:text-slate-200'
@@ -35,16 +35,16 @@ export const BottomNav: React.FC = () => {
               {({ isActive }) => (
                 <>
                   <div className="relative">
-                    <Icon className={`w-5 h-5 transition-transform ${isActive ? 'scale-110' : ''}`} />
+                    <Icon className={`w-5 h-5 transition-transform duration-300 ${isActive ? 'scale-115 text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]' : ''}`} />
                     {item.badge !== undefined && item.badge > 0 && (
-                      <span className="absolute -top-1 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center shadow-md">
+                      <span className="absolute -top-1 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center shadow-md animate-in zoom-in-75">
                         {item.badge}
                       </span>
                     )}
                   </div>
-                  <span className="text-[10px] mt-1 tracking-tight">{item.label}</span>
+                  <span className="text-[10px] mt-1 tracking-tight font-medium">{item.label}</span>
                   {isActive && (
-                    <span className="absolute bottom-0 w-8 h-0.5 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full" />
+                    <span className="absolute bottom-0 w-6 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
                   )}
                 </>
               )}

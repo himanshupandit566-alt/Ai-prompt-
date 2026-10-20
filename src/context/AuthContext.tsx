@@ -48,9 +48,8 @@ const getFirebaseFriendlyErrorMessage = (code: string, fallbackMessage?: string)
     case 'auth/wrong-password':
     case 'auth/invalid-credential':
     case 'auth/invalid-login-credentials':
-      return 'Password galat hai. Kripya sahi password dalein.';
     case 'auth/user-not-found':
-      return 'Is email se koi account nahi mila. Kripya pehle Sign Up karein.';
+      return 'Password wrong or account not found! First sign up and then sign in.';
     case 'auth/email-already-in-use':
       return 'Is email se pehle se account bana hua hai. Kripya Sign In karein.';
     case 'auth/invalid-email':

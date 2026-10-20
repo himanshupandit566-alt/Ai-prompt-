@@ -30,7 +30,9 @@ const ScrollToTop: React.FC = () => {
   return null;
 };
 
-// Initial Onboarding Gateway: Automatically manages persistent session routing
+// Initial Onboarding Gateway:
+// - Agar user logged-in nahi hai, to app open hote hi pehle 'Get Started' landing (/welcome) open hoti hai.
+// - Jab login ho jata hai, session persist rehta hai aur app direct Home Screen kholti hai.
 const OnboardingGateway: React.FC = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -39,29 +41,24 @@ const OnboardingGateway: React.FC = () => {
   useEffect(() => {
     if (loading) return;
 
-    try {
-      // 1. If user is logged in, automatically skip welcome and login screens straight to Home
-      if (isAuthenticated) {
-        if (pathname === '/welcome' || pathname === '/login') {
-          navigate('/', { replace: true });
-        }
-        return;
+    // 1. Logged in user: Skip welcome and login pages straight to Home
+    if (isAuthenticated) {
+      if (pathname === '/welcome' || pathname === '/login') {
+        navigate('/', { replace: true });
       }
+      return;
+    }
 
-      // 2. If user is not logged in and has not dismissed welcome, route to Welcome Screen
-      const hasDismissed = localStorage.getItem('fx_prompty_welcome_dismissed');
-      if (!isAuthenticated && !hasDismissed && pathname === '/') {
-        navigate('/welcome', { replace: true });
-      }
-    } catch (e) {
-      console.warn(e);
+    // 2. Unauthenticated user: App open hote hi sabse pehle 'Get Started' landing screen open ho
+    if (!isAuthenticated && pathname === '/') {
+      navigate('/welcome', { replace: true });
     }
   }, [isAuthenticated, loading, pathname, navigate]);
 
   return null;
 };
 
-// Layout Manager that hides standard header/footer on immersive onboarding & auth screens
+// Layout Manager with Smooth Slide & Fade Page Transition & Glassmorphism
 const AppContent: React.FC = () => {
   const { pathname } = useLocation();
   const isImmersiveScreen = pathname === '/welcome' || pathname === '/login';
@@ -70,29 +67,31 @@ const AppContent: React.FC = () => {
     <div className="min-h-screen bg-dark-950 text-slate-100 flex flex-col font-sans selection:bg-purple-600/30 selection:text-white">
       <OnboardingGateway />
 
-      {/* Top Navbar (hidden on full-screen welcome/login screens) */}
+      {/* Top Navbar with Glassmorphism (hidden on full-screen welcome/login screens) */}
       {!isImmersiveScreen && <Navbar />}
 
-      {/* Main Content Viewport */}
-      <main className={`flex-1 ${isImmersiveScreen ? '' : 'pb-16 md:pb-0'}`}>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/welcome" element={<WelcomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/explore" element={<ExplorePage />} />
-          <Route path="/prompt/:id" element={<PromptDetailPage />} />
-          <Route path="/favorites" element={<FavoritesPage />} />
-          <Route path="/category/:slug" element={<CategoryPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+      {/* Main Content Viewport with Smooth Page Slide & Fade Transition */}
+      <main className={`flex-1 ${isImmersiveScreen ? '' : 'pb-20 md:pb-0'}`}>
+        <div key={pathname} className="page-transition">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/welcome" element={<WelcomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/explore" element={<ExplorePage />} />
+            <Route path="/prompt/:id" element={<PromptDetailPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/category/:slug" element={<CategoryPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </div>
       </main>
 
       {/* Sleek Footer (hidden on full-screen welcome/login screens) */}
       {!isImmersiveScreen && <Footer />}
 
-      {/* Fixed Mobile Bottom Nav (hidden on full-screen welcome/login screens) */}
+      {/* Fixed Mobile Bottom Nav with Glassmorphism (hidden on full-screen welcome/login screens) */}
       {!isImmersiveScreen && <BottomNav />}
 
       {/* Toast Notification Container */}

@@ -177,10 +177,23 @@ export const SettingsPage: React.FC = () => {
       {/* Page Title & Cloud Status */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Settings &amp; Profile
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <div className="flex flex-wrap items-center gap-3 mb-1">
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Settings &amp; Profile
+            </h1>
+            <a
+              href="https://github.com/himanshupandit566-alt"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:text-white text-xs font-semibold shadow-[0_0_15px_rgba(139,92,246,0.18)] transition-all group"
+              title="Created by Himanshu Pandey"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+              <span className="text-slate-400">Created by</span>
+              <strong className="text-purple-200 group-hover:underline">Himanshu Pandey</strong>
+            </a>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-400">
             Manage your personal profile, credentials, and app preferences.
           </p>
         </div>
@@ -622,7 +635,7 @@ export const SettingsPage: React.FC = () => {
       {/* Log Out Confirmation Dialog */}
       {logoutModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0D0F17] border border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative animate-in fade-in zoom-in-95 text-center">
+          <div className="bg-[#0D0F17] border border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative modal-spring text-center">
             <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center mx-auto mb-4">
               <LogOut className="w-6 h-6" />
             </div>
@@ -653,7 +666,7 @@ export const SettingsPage: React.FC = () => {
       {/* Delete Account Confirmation Dialog */}
       {deleteModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0D0F17] border border-rose-900/60 rounded-3xl p-6 max-w-md w-full shadow-2xl relative animate-in fade-in zoom-in-95 text-center">
+          <div className="bg-[#0D0F17] border border-rose-900/60 rounded-3xl p-6 max-w-md w-full shadow-2xl relative modal-spring text-center">
             <div className="w-12 h-12 rounded-2xl bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="w-6 h-6" />
             </div>
@@ -684,7 +697,7 @@ export const SettingsPage: React.FC = () => {
       {/* Privacy Policy & Terms Modal */}
       {policyModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0D0F17] border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto shadow-2xl relative animate-in fade-in zoom-in-95">
+          <div className="bg-[#0D0F17] border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto shadow-2xl relative modal-spring">
             <button
               onClick={() => setPolicyModalOpen(null)}
               className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
