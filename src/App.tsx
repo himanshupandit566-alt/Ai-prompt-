@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { FavoritesProvider } from './context/FavoritesContext';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { BottomNav } from './components/BottomNav';
 import { Footer } from './components/Footer';
@@ -30,13 +30,37 @@ const ScrollToTop: React.FC = () => {
   return null;
 };
 
-// Layout Manager that hides standard header/footer on full-screen screens
+// Initial Onboarding Gateway: Automatically routes first-time unauthenticated visitors to /welcome
+const OnboardingGateway: React.FC = () => {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, loading } = useAuth();
+
+  useEffect(() => {
+    if (loading) return;
+    try {
+      const hasDismissed = localStorage.getItem('fx_prompty_welcome_dismissed');
+      // If user arrives at root without authentication and without previous skip, show Welcome
+      if (!isAuthenticated && !hasDismissed && pathname === '/') {
+        navigate('/welcome', { replace: true });
+      }
+    } catch (e) {
+      console.warn(e);
+    }
+  }, [isAuthenticated, loading, pathname, navigate]);
+
+  return null;
+};
+
+// Layout Manager that hides standard header/footer on immersive onboarding & auth screens
 const AppContent: React.FC = () => {
   const { pathname } = useLocation();
   const isImmersiveScreen = pathname === '/welcome' || pathname === '/login';
 
   return (
     <div className="min-h-screen bg-dark-950 text-slate-100 flex flex-col font-sans selection:bg-purple-600/30 selection:text-white">
+      <OnboardingGateway />
+
       {/* Top Navbar (hidden on full-screen welcome/login screens) */}
       {!isImmersiveScreen && <Navbar />}
 

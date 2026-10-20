@@ -1,11 +1,10 @@
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useFavorites } from '../context/FavoritesContext';
 import {
   Camera,
   Calendar,
-  Lock,
   Mail,
   User,
   Bell,
@@ -22,24 +21,44 @@ import {
   X,
   Sparkles,
   HardDrive,
-  Copy
+  Copy,
+  LogIn,
+  KeyRound
 } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, updateUserProfile, changePassword, logOut, deleteAccount, loading } = useAuth();
+  const { user, isAuthenticated, isFirebaseActive, updateUserProfile, changePassword, logOut, deleteAccount, loading } = useAuth();
   const { favorites, allPrompts, showToast } = useFavorites();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Form Fields State
-  const [displayName, setDisplayName] = useState(user?.displayName || 'Himanshu Pandey');
-  const [email, setEmail] = useState(user?.email || 'himanshupandit566@gmail.com');
-  const [dob, setDob] = useState(user?.dob || '2001-08-15');
-  const [pushNotifications, setPushNotifications] = useState(user?.pushNotifications ?? true);
-  const [avatarPreview, setAvatarPreview] = useState(
-    user?.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
-  );
+  // Dynamic Form Fields State (strictly initialized from currently logged-in user, never hardcoded)
+  const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
+  const [dob, setDob] = useState('');
+  const [pushNotifications, setPushNotifications] = useState(true);
+  const [avatarPreview, setAvatarPreview] = useState('');
+
+  // Keep state synchronized with current user
+  useEffect(() => {
+    if (user) {
+      setDisplayName(user.displayName || '');
+      setEmail(user.email || '');
+      setDob(user.dob || '');
+      setPushNotifications(user.pushNotifications ?? true);
+      setAvatarPreview(
+        user.photoURL ||
+        `https://api.dicebear.com/7.x/identicon/svg?seed=${user.email || user.uid}`
+      );
+    } else {
+      setDisplayName('');
+      setEmail('');
+      setDob('');
+      setPushNotifications(true);
+      setAvatarPreview('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80');
+    }
+  }, [user]);
 
   // Change Password Section Expandable State
   const [showPasswordSection, setShowPasswordSection] = useState(false);
@@ -54,19 +73,19 @@ export const SettingsPage: React.FC = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [policyModalOpen, setPolicyModalOpen] = useState<'privacy' | 'terms' | null>(null);
 
-  // Handle Avatar Image Upload from Gallery
+  // Handle Avatar Image Upload from Device Gallery
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        showToast('Image size should be less than 5MB', 'error');
+        showToast('Image size 5MB se chhota hona chahiye.', 'error');
         return;
       }
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
           setAvatarPreview(reader.result);
-          showToast('Avatar updated! Tap "Save Changes" to persist.', 'info');
+          showToast('Photo select ho gayi! Niche "Save Changes" dabakar save karein.', 'info');
         }
       };
       reader.readAsDataURL(file);
@@ -76,6 +95,12 @@ export const SettingsPage: React.FC = () => {
   // Handle Save Profile Changes
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      showToast('Kripya pehle Sign In karein taaki profile save ho sake.', 'error');
+      navigate('/login');
+      return;
+    }
+
     const res = await updateUserProfile({
       displayName: displayName.trim(),
       email: email.trim(),
@@ -85,28 +110,28 @@ export const SettingsPage: React.FC = () => {
     });
 
     if (res.success) {
-      showToast('Profile settings saved to Firebase & Storage! ✨', 'success');
+      showToast('Profile details Firestore & Storage me save ho gayi! ✨', 'success');
     } else {
-      showToast(res.error || 'Failed to update profile.', 'error');
+      showToast(res.error || 'Profile update karne me samasya aayi.', 'error');
     }
   };
 
-  // Handle Password Update
+  // Handle Password Update with Re-authentication
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError('');
     setPasswordSuccess(false);
 
     if (!currentPassword) {
-      setPasswordError('Please enter current password.');
+      setPasswordError('Kripya current password enter karein.');
       return;
     }
     if (newPassword.length < 6) {
-      setPasswordError('New password must be at least 6 characters.');
+      setPasswordError('Naya password kam se kam 6 characters ka hona chahiye.');
       return;
     }
     if (newPassword !== confirmNewPassword) {
-      setPasswordError('New passwords do not match.');
+      setPasswordError('Naye passwords match nahi ho rahe hain.');
       return;
     }
 
@@ -116,32 +141,32 @@ export const SettingsPage: React.FC = () => {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
-      showToast('Password changed successfully!', 'success');
+      showToast('Password successfully change ho gaya!', 'success');
       setTimeout(() => setShowPasswordSection(false), 2000);
     } else {
-      setPasswordError(res.error || 'Could not change password.');
+      setPasswordError(res.error || 'Password badalne me asafal.');
     }
   };
 
-  // Handle Log Out Confirmation
+  // Handle Log Out Confirmation & Redirect to Welcome
   const handleConfirmLogout = async () => {
     await logOut();
     setLogoutModalOpen(false);
-    showToast('Logged out of FX Prompty.', 'info');
+    showToast('FX Prompty se log out ho gaye.', 'info');
     navigate('/welcome');
   };
 
-  // Handle Account Deletion
+  // Handle Account Deletion conforming to Google Play Store guidelines
   const handleConfirmDelete = async () => {
     await deleteAccount();
     setDeleteModalOpen(false);
-    showToast('Your account and personal data have been deleted.', 'info');
+    showToast('Aapka account aur personal data permanently delete kar diya gaya hai.', 'info');
     navigate('/welcome');
   };
 
-  // Clear Saved Favorites
+  // Clear Saved Favorites Cache
   const handleClearFavorites = () => {
-    if (window.confirm('Clear all your local saved prompt favorites?')) {
+    if (window.confirm('Kya aap sabhi saved favorites clear karna chahte hain?')) {
       localStorage.removeItem('promptverse_favorites_v1');
       window.location.reload();
     }
@@ -149,41 +174,73 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 text-slate-100 font-sans">
-      {/* Page Title */}
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Settings &amp; Profile
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          Customize your profile, preferences, and account security.
-        </p>
+      {/* Page Title & Cloud Status */}
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Settings &amp; Profile
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            Manage your personal profile, credentials, and app preferences.
+          </p>
+        </div>
+
+        {/* Dynamic Firebase / Local indicator */}
+        <div className="self-start sm:self-auto flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-medium">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span>{isFirebaseActive ? 'Firebase Auth Connected' : 'Local Auth Sync Active'}</span>
+        </div>
       </div>
+
+      {/* Guest Warning / Sign-In Promotion Banner if not authenticated */}
+      {!isAuthenticated && (
+        <div className="mb-6 p-4 rounded-3xl bg-gradient-to-r from-purple-900/30 via-indigo-900/20 to-[#0D0F17] border border-purple-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3 text-center sm:text-left">
+            <div className="w-10 h-10 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
+              <User className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white">You are browsing as Guest</p>
+              <p className="text-xs text-slate-400">
+                Sign in or create an account to customize your profile, sync favorites across devices, and manage settings.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/login"
+            className="shrink-0 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md transition-all flex items-center gap-1.5"
+          >
+            <LogIn className="w-3.5 h-3.5" />
+            <span>Sign In / Register</span>
+          </Link>
+        </div>
+      )}
 
       <div className="space-y-6">
         {/* ========================================================= */}
-        {/* 1. PROFILE HEADER SECTION (Avatar + Edit Camera + Info) */}
+        {/* 1. PROFILE HEADER SECTION (Avatar + Camera Icon + Dynamic Info) */}
         {/* ========================================================= */}
         <div className="bg-[#0D0F17] border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden backdrop-blur-md">
-          {/* Subtle Accent Glow */}
+          {/* Subtle Ambient Glow */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl pointer-events-none -z-0" />
 
           <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
-            {/* Circular Avatar with Edit Camera Button */}
+            {/* Circular Avatar with Camera / Edit Button */}
             <div className="relative shrink-0 group">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-500 shadow-[0_0_25px_-5px_rgba(139,92,246,0.6)]">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-500 shadow-[0_0_30px_-5px_rgba(139,92,246,0.6)]">
                 <img
-                  src={avatarPreview}
-                  alt={displayName}
+                  src={avatarPreview || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80'}
+                  alt={displayName || 'User Avatar'}
                   className="w-full h-full rounded-full object-cover bg-dark-950"
                 />
               </div>
 
-              {/* Camera / Edit Icon Button */}
+              {/* Camera Icon Button (Tap to select photo from gallery) */}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 title="Change Profile Photo"
-                className="absolute bottom-1 right-1 p-2.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-lg border-2 border-[#0D0F17] transition-transform active:scale-95 group-hover:scale-105"
+                className="absolute bottom-1 right-1 p-2.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-lg border-2 border-[#0D0F17] transition-transform active:scale-95 group-hover:scale-105 cursor-pointer"
               >
                 <Camera className="w-4 h-4" />
               </button>
@@ -198,19 +255,23 @@ export const SettingsPage: React.FC = () => {
               />
             </div>
 
-            {/* Display Name & Email */}
+            {/* Display Name & Email (Dynamically rendered) */}
             <div className="flex-1">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-semibold mb-2">
-                <Sparkles className="w-3 h-3" /> FX Creator Profile
+                <Sparkles className="w-3 h-3" /> FX Creator
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                {displayName || 'Himanshu Pandey'}
+                {displayName || (isAuthenticated ? 'New Creator' : 'Guest Visitor')}
               </h2>
               <p className="text-sm text-slate-400 font-mono mt-0.5">
-                {email || 'himanshupandit566@gmail.com'}
+                {email || (isAuthenticated ? 'No email linked' : 'Not signed in')}
               </p>
-              <p className="text-xs text-slate-400 mt-2 max-w-md">
-                Member since {user?.createdAt || '2026-01-10'} • Firebase Synced
+              <p className="text-xs text-slate-500 mt-2">
+                {isAuthenticated ? (
+                  <>Member since {user?.createdAt || 'Today'} • Firestore Sync</>
+                ) : (
+                  <>Local guest session • Data saved locally</>
+                )}
               </p>
             </div>
           </div>
@@ -223,7 +284,7 @@ export const SettingsPage: React.FC = () => {
           <div className="flex items-center gap-2 border-b border-slate-800/80 pb-4">
             <User className="w-5 h-5 text-purple-400" />
             <h3 className="text-base font-bold text-white tracking-tight">
-              Account Details
+              Account Details &amp; Personal Info
             </h3>
           </div>
 
@@ -240,7 +301,7 @@ export const SettingsPage: React.FC = () => {
                   required
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Your Name"
+                  placeholder="Enter your name"
                   className="w-full pl-10 pr-4 py-2.5 bg-[#07080B] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
                 />
               </div>
@@ -264,7 +325,7 @@ export const SettingsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Date of Birth (DOB) Field with Calendar Picker */}
+            {/* Date of Birth (DOB) Field with Native Calendar Picker Dialogue */}
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
                 Date of Birth (DOB)
@@ -278,17 +339,22 @@ export const SettingsPage: React.FC = () => {
                   className="w-full pl-10 pr-4 py-2.5 bg-[#07080B] border border-slate-800 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all [color-scheme:dark]"
                 />
               </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Tap to open calendar picker dialogue
+              </p>
             </div>
 
-            {/* Account Role / ID (Read-only badge) */}
+            {/* User ID & Role Badge */}
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                User ID &amp; Status
+                User ID &amp; Cloud Status
               </label>
               <div className="px-4 py-2.5 bg-[#07080B] border border-slate-800 rounded-xl text-sm text-slate-400 flex items-center justify-between">
-                <span className="font-mono text-xs text-purple-300">{user?.uid || 'usr-fx-001'}</span>
-                <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  Active
+                <span className="font-mono text-xs text-purple-300 truncate max-w-[170px]">
+                  {user?.uid || 'guest-session'}
+                </span>
+                <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 shrink-0">
+                  {isAuthenticated ? 'Authenticated' : 'Guest'}
                 </span>
               </div>
             </div>
@@ -299,13 +365,13 @@ export const SettingsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowPasswordSection(!showPasswordSection)}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
+              className="w-full p-4 flex items-center justify-between text-left hover:bg-white/5 transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2.5">
-                <Lock className="w-4 h-4 text-purple-400" />
+                <KeyRound className="w-4 h-4 text-purple-400" />
                 <div>
                   <p className="text-sm font-semibold text-slate-200">Change Password</p>
-                  <p className="text-xs text-slate-500">Update your account login credentials</p>
+                  <p className="text-xs text-slate-500">Update your account credentials with re-authentication</p>
                 </div>
               </div>
               {showPasswordSection ? (
@@ -318,15 +384,15 @@ export const SettingsPage: React.FC = () => {
             {showPasswordSection && (
               <div className="p-4 pt-2 border-t border-slate-800/80 space-y-3 bg-[#07080B]">
                 {passwordError && (
-                  <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                  <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 shrink-0" />
                     <span>{passwordError}</span>
                   </div>
                 )}
                 {passwordSuccess && (
-                  <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
                     <Check className="w-4 h-4 shrink-0" />
-                    <span>Password updated successfully!</span>
+                    <span>Password successfully update ho gaya!</span>
                   </div>
                 )}
 
@@ -367,7 +433,7 @@ export const SettingsPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleUpdatePassword}
-                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-md transition-all"
+                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-md transition-all cursor-pointer"
                   >
                     Update Password
                   </button>
@@ -381,7 +447,7 @@ export const SettingsPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="py-3 px-6 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-sm shadow-[0_0_25px_-5px_rgba(139,92,246,0.6)] hover:shadow-[0_0_35px_-5px_rgba(139,92,246,0.8)] transition-all active:scale-98 flex items-center gap-2"
+              className="py-3 px-6 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-sm shadow-[0_0_25px_-5px_rgba(139,92,246,0.6)] hover:shadow-[0_0_35px_-5px_rgba(139,92,246,0.8)] transition-all active:scale-98 flex items-center gap-2 cursor-pointer"
             >
               <Check className="w-4 h-4" />
               <span>Save Changes</span>
@@ -421,10 +487,12 @@ export const SettingsPage: React.FC = () => {
                 onClick={() => {
                   const nextVal = !pushNotifications;
                   setPushNotifications(nextVal);
-                  updateUserProfile({ pushNotifications: nextVal });
-                  showToast(nextVal ? 'Notifications enabled' : 'Notifications disabled', 'info');
+                  if (isAuthenticated) {
+                    updateUserProfile({ pushNotifications: nextVal });
+                  }
+                  showToast(nextVal ? 'Push notifications enabled' : 'Push notifications disabled', 'info');
                 }}
-                className={`w-12 h-6 rounded-full transition-colors relative focus:outline-none ${
+                className={`w-12 h-6 rounded-full transition-colors relative focus:outline-none cursor-pointer ${
                   pushNotifications ? 'bg-purple-600' : 'bg-slate-800'
                 }`}
               >
@@ -441,7 +509,7 @@ export const SettingsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setPolicyModalOpen('privacy')}
-                className="flex items-center justify-between p-3.5 rounded-xl bg-[#07080B] hover:bg-white/5 border border-slate-800 text-xs text-slate-300 transition-colors"
+                className="flex items-center justify-between p-3.5 rounded-xl bg-[#07080B] hover:bg-white/5 border border-slate-800 text-xs text-slate-300 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
                   <Shield className="w-4 h-4 text-emerald-400" />
@@ -453,7 +521,7 @@ export const SettingsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setPolicyModalOpen('terms')}
-                className="flex items-center justify-between p-3.5 rounded-xl bg-[#07080B] hover:bg-white/5 border border-slate-800 text-xs text-slate-300 transition-colors"
+                className="flex items-center justify-between p-3.5 rounded-xl bg-[#07080B] hover:bg-white/5 border border-slate-800 text-xs text-slate-300 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-blue-400" />
@@ -463,10 +531,10 @@ export const SettingsPage: React.FC = () => {
               </button>
             </div>
 
-            {/* App Version & Diagnostics */}
+            {/* App Version Display */}
             <div className="flex items-center justify-between py-2 text-xs text-slate-500 border-t border-slate-800/60 mt-4">
               <span className="flex items-center gap-1.5">
-                <Info className="w-3.5 h-3.5" /> FX Prompty Production Build
+                <Info className="w-3.5 h-3.5" /> FX Prompty Production Release
               </span>
               <span className="font-mono text-purple-400 font-bold bg-purple-500/10 px-2 py-0.5 rounded-md border border-purple-500/20">
                 v1.0.0
@@ -482,7 +550,7 @@ export const SettingsPage: React.FC = () => {
           <div className="flex items-center gap-2 border-b border-slate-800/80 pb-4 mb-4">
             <HardDrive className="w-5 h-5 text-blue-400" />
             <h3 className="text-base font-bold text-white tracking-tight">
-              Local Library Storage
+              Library Storage &amp; Cache
             </h3>
           </div>
 
@@ -501,7 +569,7 @@ export const SettingsPage: React.FC = () => {
             type="button"
             onClick={handleClearFavorites}
             disabled={favorites.length === 0}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-dark-850 hover:bg-rose-950/30 text-slate-300 hover:text-rose-300 border border-slate-700 text-xs font-semibold transition-all disabled:opacity-40"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-dark-850 hover:bg-rose-950/30 text-slate-300 hover:text-rose-300 border border-slate-700 text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer"
           >
             <Copy className="w-3.5 h-3.5" />
             <span>Clear Saved Favorites</span>
@@ -515,12 +583,12 @@ export const SettingsPage: React.FC = () => {
           <div className="flex items-center gap-2 border-b border-rose-950/40 pb-4">
             <AlertTriangle className="w-5 h-5 text-rose-400" />
             <h3 className="text-base font-bold text-white tracking-tight">
-              Session Management &amp; Danger Zone
+              Danger Zone &amp; Session Management
             </h3>
           </div>
 
           <p className="text-xs text-slate-400 leading-relaxed">
-            Manage your active session or submit an account deletion request adhering to Google Play Store and data privacy guidelines.
+            Manage your active session or submit an account deletion request adhering to Google Play Store data safety guidelines.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -528,7 +596,7 @@ export const SettingsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setLogoutModalOpen(true)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-rose-500/50 hover:bg-rose-500/10 text-rose-400 hover:text-rose-300 font-semibold text-xs transition-all active:scale-95"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-rose-500/50 hover:bg-rose-500/10 text-rose-400 hover:text-rose-300 font-semibold text-xs transition-all active:scale-95 cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               <span>Log Out</span>
@@ -538,7 +606,7 @@ export const SettingsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setDeleteModalOpen(true)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600/10 hover:bg-rose-600/20 border border-rose-600/40 text-rose-400 font-semibold text-xs transition-all active:scale-95"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600/10 hover:bg-rose-600/20 border border-rose-600/40 text-rose-400 font-semibold text-xs transition-all active:scale-95 cursor-pointer"
             >
               <Trash2 className="w-4 h-4" />
               <span>Delete Account</span>
@@ -558,22 +626,22 @@ export const SettingsPage: React.FC = () => {
             <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center mx-auto mb-4">
               <LogOut className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">Log out of FX Prompty?</h3>
+            <h3 className="text-lg font-bold text-white mb-2">Are you sure you want to log out?</h3>
             <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-              Are you sure you want to log out? You will need to sign in again to access your synced profile.
+              Confirm karne par aapka active session clear ho jayega aur aap Welcome screen par redirect ho jayenge.
             </p>
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setLogoutModalOpen(false)}
-                className="flex-1 py-2.5 rounded-xl bg-[#07080B] hover:bg-white/5 border border-slate-700 text-slate-300 text-xs font-semibold"
+                className="flex-1 py-2.5 rounded-xl bg-[#07080B] hover:bg-white/5 border border-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleConfirmLogout}
-                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-lg shadow-rose-600/30"
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-lg shadow-rose-600/30 cursor-pointer"
               >
                 Yes, Log Out
               </button>
@@ -591,20 +659,20 @@ export const SettingsPage: React.FC = () => {
             </div>
             <h3 className="text-lg font-bold text-white mb-2">Delete Your Account?</h3>
             <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-              This action is permanent and complies with Google Play Store data deletion policies. All your saved profile information, favorites, and custom prompts will be permanently removed.
+              This request permanently deletes your account and personal data in full compliance with Google Play Store data safety guidelines. This action cannot be undone.
             </p>
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setDeleteModalOpen(false)}
-                className="flex-1 py-2.5 rounded-xl bg-[#07080B] border border-slate-700 text-slate-300 text-xs font-semibold"
+                className="flex-1 py-2.5 rounded-xl bg-[#07080B] border border-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
               >
                 Keep Account
               </button>
               <button
                 type="button"
                 onClick={handleConfirmDelete}
-                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-lg shadow-rose-600/40"
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-lg shadow-rose-600/40 cursor-pointer"
               >
                 Permanently Delete
               </button>
@@ -619,7 +687,7 @@ export const SettingsPage: React.FC = () => {
           <div className="bg-[#0D0F17] border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto shadow-2xl relative animate-in fade-in zoom-in-95">
             <button
               onClick={() => setPolicyModalOpen(null)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white"
+              className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -635,7 +703,7 @@ export const SettingsPage: React.FC = () => {
                     <strong>1. Overview:</strong> FX Prompty respects your privacy. We do not sell your personal data or prompt history to any advertising third parties.
                   </p>
                   <p>
-                    <strong>2. Data We Store:</strong> Your profile data (name, email, avatar, DOB) is stored locally on your device and synchronized through standard Firebase authentication when configured.
+                    <strong>2. Data We Store:</strong> Your profile data (name, email, avatar, DOB) is stored locally on your device and synchronized through standard Firebase authentication and Firestore database when configured.
                   </p>
                   <p>
                     <strong>3. Cookies &amp; Storage:</strong> We use local storage purely to remember your saved prompt favorites and application theme preferences.
@@ -669,7 +737,7 @@ export const SettingsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setPolicyModalOpen(null)}
-                className="px-4 py-2 rounded-xl bg-purple-600 text-white font-semibold text-xs"
+                className="px-4 py-2 rounded-xl bg-purple-600 text-white font-semibold text-xs cursor-pointer"
               >
                 Close
               </button>

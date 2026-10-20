@@ -12,7 +12,8 @@ import {
   ArrowRight,
   AlertCircle,
   CheckCircle2,
-  X
+  X,
+  Compass
 } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
@@ -26,64 +27,88 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Error & Status Messages
   const [errorMessage, setErrorMessage] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   // Forgot password modal state
   const [forgotModalOpen, setForgotModalOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetSuccess, setResetSuccess] = useState(false);
+  const [resetError, setResetError] = useState('');
 
   // Email format validator
   const isValidEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateInputs = (): boolean => {
+    let isValid = true;
+    setEmailError('');
+    setPasswordError('');
     setErrorMessage('');
 
-    // Validation
-    if (!email.trim() || !isValidEmail(email)) {
-      setErrorMessage('Please enter a valid email address.');
-      return;
+    if (!email.trim()) {
+      setEmailError('Kripya ek valid email address enter karein.');
+      isValid = false;
+    } else if (!isValidEmail(email.trim())) {
+      setEmailError('Kripya ek valid email address enter karein.');
+      isValid = false;
     }
 
-    if (password.length < 6) {
-      setErrorMessage('Password must be at least 6 characters long.');
-      return;
+    if (!password) {
+      setPasswordError('Kripya password enter karein.');
+      isValid = false;
+    } else if (password.length < 6) {
+      setPasswordError('Password kam se kam 6 characters ka hona chahiye.');
+      isValid = false;
     }
 
     if (mode === 'signup') {
       if (!displayName.trim()) {
-        setErrorMessage('Please enter your name.');
-        return;
+        setErrorMessage('Kripya apna poora naam enter karein.');
+        isValid = false;
+      } else if (password !== confirmPassword) {
+        setErrorMessage('Passwords match nahi ho rahe hain.');
+        isValid = false;
       }
-      if (password !== confirmPassword) {
-        setErrorMessage('Passwords do not match.');
-        return;
-      }
+    }
 
+    return isValid;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateInputs()) return;
+
+    if (mode === 'signup') {
       const res = await signUpWithEmail(displayName, email, password);
       if (res.success) {
-        showToast(`Welcome to FX Prompty, ${displayName}! 🎉`, 'success');
+        showToast(`Account successfully ban gaya! Welcome ${displayName}! 🎉`, 'success');
         navigate('/');
       } else {
-        setErrorMessage(res.error || 'Sign up failed.');
+        setErrorMessage(res.error || 'Sign Up me samasya aayi.');
       }
     } else {
       const res = await signInWithEmail(email, password);
       if (res.success) {
-        showToast('Signed in successfully! ✨', 'success');
+        showToast('Successfully signed in! ✨', 'success');
         navigate('/');
       } else {
-        setErrorMessage(res.error || 'Invalid email or password.');
+        setErrorMessage(res.error || 'Sign In fail ho gaya.');
       }
     }
   };
 
   const handleGoogleSignIn = async () => {
     setErrorMessage('');
+    setEmailError('');
+    setPasswordError('');
+
     const res = await signInWithGoogle();
     if (res.success) {
-      showToast('Signed in with Google! 🚀', 'success');
+      showToast('Google account se successfully sign in ho gaya! 🚀', 'success');
       navigate('/');
     } else {
       setErrorMessage(res.error || 'Google Sign-In failed.');
@@ -92,64 +117,69 @@ export const LoginPage: React.FC = () => {
 
   const handleSendReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!resetEmail.trim() || !isValidEmail(resetEmail)) {
-      setErrorMessage('Please enter a valid email address.');
+    setResetError('');
+
+    if (!resetEmail.trim() || !isValidEmail(resetEmail.trim())) {
+      setResetError('Kripya ek valid email address enter karein.');
       return;
     }
-    const res = await sendPasswordReset(resetEmail);
+
+    const res = await sendPasswordReset(resetEmail.trim());
     if (res.success) {
       setResetSuccess(true);
-      showToast('Password reset email sent!', 'info');
+      showToast('Password reset link aapke email par bhej diya gaya hai!', 'info');
       setTimeout(() => {
         setForgotModalOpen(false);
         setResetSuccess(false);
-      }, 2500);
+      }, 3000);
     } else {
-      setErrorMessage(res.error || 'Unable to send reset email.');
+      setResetError(res.error || 'Password reset link bhejne me asafal.');
     }
   };
 
   return (
     <div className="min-h-screen bg-[#07080B] text-slate-100 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 relative overflow-hidden font-sans">
       {/* Background Neon Glowing Gradients */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-gradient-to-tr from-purple-600/15 via-indigo-600/15 to-blue-600/15 blur-[130px] rounded-full pointer-events-none -z-10" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-gradient-to-tr from-purple-600/15 via-indigo-600/15 to-blue-600/15 blur-[140px] rounded-full pointer-events-none -z-10" />
 
       {/* Brand Logo Header */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center mb-6">
         <Link to="/" className="inline-flex items-center gap-2.5 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 p-0.5 shadow-glow-purple group-hover:scale-105 transition-transform">
-            <div className="w-full h-full bg-[#0D0F17] rounded-[10px] flex items-center justify-center">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 p-0.5 shadow-[0_0_25px_rgba(139,92,246,0.5)] group-hover:scale-105 transition-transform">
+            <div className="w-full h-full bg-[#0D0F17] rounded-[14px] flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-purple-400" />
             </div>
           </div>
-          <span className="font-extrabold text-xl tracking-tight text-white">
+          <span className="font-extrabold text-2xl tracking-tight text-white">
             FX <span className="text-purple-400">Prompty</span>
           </span>
         </Link>
         <h2 className="mt-4 text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-          {mode === 'login' ? 'Welcome back' : 'Create an account'}
+          {mode === 'login' ? 'Sign In to FX Prompty' : 'Create an Account'}
         </h2>
         <p className="mt-1 text-xs sm:text-sm text-slate-400">
           {mode === 'login'
             ? 'Sign in to access your saved prompts & favorites.'
-            : 'Join the community of prompt engineers & creators.'}
+            : 'Join thousands of AI prompt creators and enthusiasts.'}
         </p>
       </div>
 
       {/* Main Glassmorphic Card */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-[#0D0F17]/90 border border-slate-800/80 backdrop-blur-xl py-7 px-6 sm:px-8 shadow-2xl rounded-3xl relative">
-          {/* Mode Switcher Tabs (Login / Sign Up) */}
-          <div className="flex bg-[#07080B] p-1 rounded-2xl mb-6 border border-slate-800/80">
+        <div className="bg-[#0D0F17]/95 border border-slate-800 backdrop-blur-2xl py-7 px-6 sm:px-8 shadow-2xl rounded-3xl relative">
+          {/* Mode Switcher Tabs (Sign In / Sign Up) */}
+          <div className="flex bg-[#07080B] p-1.5 rounded-2xl mb-6 border border-slate-800">
             <button
               type="button"
               onClick={() => {
                 setMode('login');
                 setErrorMessage('');
+                setEmailError('');
+                setPasswordError('');
               }}
-              className={`flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all ${
+              className={`flex-1 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition-all cursor-pointer ${
                 mode === 'login'
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/30'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -160,10 +190,12 @@ export const LoginPage: React.FC = () => {
               onClick={() => {
                 setMode('signup');
                 setErrorMessage('');
+                setEmailError('');
+                setPasswordError('');
               }}
-              className={`flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all ${
+              className={`flex-1 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition-all cursor-pointer ${
                 mode === 'signup'
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/30'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -171,11 +203,18 @@ export const LoginPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Error Message Box */}
+          {/* Strict Clear Red Alert Box */}
           {errorMessage && (
-            <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2 animate-in fade-in">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{errorMessage}</span>
+            <div className="mb-5 p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-rose-200 text-xs flex items-start gap-2.5 animate-in fade-in shadow-lg shadow-rose-950/20">
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <div className="flex-1 font-medium leading-relaxed">{errorMessage}</div>
+              <button
+                type="button"
+                onClick={() => setErrorMessage('')}
+                className="text-rose-400 hover:text-rose-200 ml-1"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             </div>
           )}
 
@@ -194,14 +233,14 @@ export const LoginPage: React.FC = () => {
                     required
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="e.g. Himanshu Pandey"
+                    placeholder="Enter your full name"
                     className="w-full pl-10 pr-4 py-2.5 bg-[#07080B] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                   />
                 </div>
               </div>
             )}
 
-            {/* Email Field */}
+            {/* Email Field with Inline Error Validation */}
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
                 Email Address
@@ -212,11 +251,24 @@ export const LoginPage: React.FC = () => {
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (emailError) setEmailError('');
+                  }}
                   placeholder="name@example.com"
-                  className="w-full pl-10 pr-4 py-2.5 bg-[#07080B] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                  className={`w-full pl-10 pr-4 py-2.5 bg-[#07080B] border rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-colors ${
+                    emailError
+                      ? 'border-rose-500 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500'
+                  }`}
                 />
               </div>
+              {emailError && (
+                <p className="mt-1.5 text-[11px] text-rose-400 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  <span>{emailError}</span>
+                </p>
+              )}
             </div>
 
             {/* Password Field */}
@@ -230,9 +282,11 @@ export const LoginPage: React.FC = () => {
                     type="button"
                     onClick={() => {
                       setResetEmail(email);
+                      setResetError('');
+                      setResetSuccess(false);
                       setForgotModalOpen(true);
                     }}
-                    className="text-[11px] font-medium text-purple-400 hover:text-purple-300 hover:underline"
+                    className="text-[11px] font-medium text-purple-400 hover:text-purple-300 hover:underline cursor-pointer"
                   >
                     Forgot Password?
                   </button>
@@ -244,18 +298,31 @@ export const LoginPage: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (passwordError) setPasswordError('');
+                  }}
                   placeholder="At least 6 characters"
-                  className="w-full pl-10 pr-10 py-2.5 bg-[#07080B] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                  className={`w-full pl-10 pr-10 py-2.5 bg-[#07080B] border rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-colors ${
+                    passwordError
+                      ? 'border-rose-500 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500'
+                  }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {passwordError && (
+                <p className="mt-1.5 text-[11px] text-rose-400 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  <span>{passwordError}</span>
+                </p>
+              )}
             </div>
 
             {/* Confirm Password (Only in Sign Up mode) */}
@@ -267,13 +334,20 @@ export const LoginPage: React.FC = () => {
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showConfirmPassword ? 'text' : 'password'}
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Re-enter password"
-                    className="w-full pl-10 pr-4 py-2.5 bg-[#07080B] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                    className="w-full pl-10 pr-10 py-2.5 bg-[#07080B] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 cursor-pointer"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
             )}
@@ -282,13 +356,13 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-sm shadow-[0_0_25px_-5px_rgba(139,92,246,0.5)] transition-all active:scale-98 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-sm shadow-[0_0_25px_-5px_rgba(139,92,246,0.6)] hover:shadow-[0_0_35px_-5px_rgba(139,92,246,0.8)] transition-all active:scale-98 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>{mode === 'login' ? 'Sign In' : 'Create Free Account'}</span>
+                  <span>{mode === 'login' ? 'Sign In' : 'Create Account'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -300,9 +374,9 @@ export const LoginPage: React.FC = () => {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-slate-800" />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-[#0D0F17] px-3 text-slate-500 font-semibold tracking-wider">
-                Or Continue With
+            <div className="relative flex justify-center text-[10px] uppercase tracking-widest">
+              <span className="bg-[#0D0F17] px-3 text-slate-500 font-bold">
+                OR CONTINUE WITH
               </span>
             </div>
           </div>
@@ -312,7 +386,7 @@ export const LoginPage: React.FC = () => {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#07080B] hover:bg-[#131622] border border-slate-800 hover:border-slate-700 text-slate-200 font-semibold text-sm transition-all flex items-center justify-center gap-3 active:scale-98 shadow-sm"
+            className="w-full py-3 px-4 rounded-xl bg-[#07080B] hover:bg-[#131622] border border-slate-800 hover:border-slate-700 text-slate-200 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-3 active:scale-98 shadow-sm cursor-pointer"
           >
             {/* Official Google Vector Icon */}
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -340,9 +414,10 @@ export const LoginPage: React.FC = () => {
           <div className="mt-6 text-center">
             <Link
               to="/"
-              className="text-xs text-slate-400 hover:text-purple-400 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-purple-400 transition-colors"
             >
-              Continue as Guest without account →
+              <Compass className="w-3.5 h-3.5" />
+              <span>Continue as Guest without account →</span>
             </Link>
           </div>
         </div>
@@ -361,13 +436,20 @@ export const LoginPage: React.FC = () => {
 
             <h3 className="text-lg font-bold text-white mb-1">Reset Password</h3>
             <p className="text-xs text-slate-400 mb-4">
-              Enter your registered email address and we'll send you instructions to reset your password.
+              Enter your registered email address to receive password reset instructions.
             </p>
+
+            {resetError && (
+              <div className="mb-3 p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{resetError}</span>
+              </div>
+            )}
 
             {resetSuccess ? (
               <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>Password reset link sent! Please check your inbox.</span>
+                <span>Password reset link sent! Check your email.</span>
               </div>
             ) : (
               <form onSubmit={handleSendReset} className="space-y-3">
@@ -376,13 +458,13 @@ export const LoginPage: React.FC = () => {
                   required
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  placeholder="Enter your registered email"
                   className="w-full px-4 py-2.5 bg-[#07080B] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
                 />
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-md transition-all"
+                  className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-md transition-all cursor-pointer"
                 >
                   Send Reset Link
                 </button>
