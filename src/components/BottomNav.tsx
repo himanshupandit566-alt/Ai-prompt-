@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, Compass, Heart, Grid, Settings } from 'lucide-react';
 import { useFavorites } from '../context/FavoritesContext';
+import { playPopSound } from '../utils/sound';
 
 export const BottomNav: React.FC = () => {
   const { favorites } = useFavorites();
@@ -24,6 +25,7 @@ export const BottomNav: React.FC = () => {
               key={item.to}
               to={item.to}
               end={item.exact}
+              onClick={() => playPopSound(0.05)}
               className={({ isActive }) =>
                 `flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all relative ${
                   isActive

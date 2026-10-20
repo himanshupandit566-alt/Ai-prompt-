@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, Heart, Settings, PlusCircle, Compass, Grid, Sparkles, X, LogIn } from 'lucide-react';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
+import { playClickSound, playPopSound } from '../utils/sound';
 
 export const Navbar: React.FC = () => {
   const { favorites } = useFavorites();
@@ -75,6 +76,7 @@ export const Navbar: React.FC = () => {
           <nav className="hidden lg:flex items-center gap-1">
             <Link
               to="/explore"
+              onClick={() => playClickSound()}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive('/explore')
                   ? 'bg-purple-600/15 text-purple-400'
@@ -86,6 +88,7 @@ export const Navbar: React.FC = () => {
 
             <Link
               to="/category/all"
+              onClick={() => playClickSound()}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive('/category')
                   ? 'bg-purple-600/15 text-purple-400'
@@ -97,6 +100,7 @@ export const Navbar: React.FC = () => {
 
             <Link
               to="/admin"
+              onClick={() => playClickSound()}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive('/admin')
                   ? 'bg-purple-600/15 text-purple-400'
@@ -133,6 +137,7 @@ export const Navbar: React.FC = () => {
             {/* Favorites Icon */}
             <Link
               to="/favorites"
+              onClick={() => playPopSound(0.06)}
               className={`relative p-2 rounded-xl transition-all ${
                 isActive('/favorites')
                   ? 'bg-rose-500/15 text-rose-400'
@@ -152,6 +157,7 @@ export const Navbar: React.FC = () => {
             {isAuthenticated && user ? (
               <Link
                 to="/settings"
+                onClick={() => playClickSound()}
                 title={`${user.displayName} (Profile & Settings)`}
                 className="flex items-center gap-2 p-0.5 rounded-full border border-purple-500/40 hover:border-purple-400 bg-gradient-to-tr from-purple-600 to-indigo-600 shadow-sm transition-all"
               >
@@ -164,6 +170,7 @@ export const Navbar: React.FC = () => {
             ) : (
               <Link
                 to="/login"
+                onClick={() => playClickSound()}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold shadow-sm transition-all"
               >
                 <LogIn className="w-3.5 h-3.5" />
@@ -174,6 +181,7 @@ export const Navbar: React.FC = () => {
             {/* Settings */}
             <Link
               to="/settings"
+              onClick={() => playClickSound()}
               className={`p-2 rounded-xl transition-all ${
                 isActive('/settings')
                   ? 'bg-purple-600/15 text-purple-400'

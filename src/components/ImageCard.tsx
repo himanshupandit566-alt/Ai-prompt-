@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Copy, Check, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { Heart, Sparkles, Image as ImageIcon, Eye } from 'lucide-react';
 import { PromptItem } from '../types/prompt';
 import { useFavorites } from '../context/FavoritesContext';
-import { copyToClipboard } from '../utils/clipboard';
+import { playClickSound, playPopSound } from '../utils/sound';
 
 interface ImageCardProps {
   prompt: PromptItem;
@@ -11,30 +11,21 @@ interface ImageCardProps {
 }
 
 export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }) => {
-  const { isFavorite, toggleFavorite, showToast } = useFavorites();
-  const [copied, setCopied] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   const favorited = isFavorite(prompt.id);
 
-  const handleCopy = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const ok = await copyToClipboard(prompt.prompt);
-    if (ok) {
-      setCopied(true);
-      showToast('Prompt copied to clipboard! ✨', 'success');
-      setTimeout(() => setCopied(false), 2000);
-    } else {
-      showToast('Could not copy automatically', 'error');
-    }
-  };
-
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    playPopSound(0.06);
     toggleFavorite(prompt.id);
+  };
+
+  const handleCardClick = () => {
+    playClickSound(0.04);
   };
 
   // Determine aspect ratio class
@@ -58,8 +49,12 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
   };
 
   return (
-    <div className="group relative rounded-2xl overflow-hidden bg-dark-900 border border-slate-800/80 hover:border-purple-500/40 transition-all duration-300 shadow-lg hover:shadow-glow-purple flex flex-col">
-      <Link to={`/prompt/${prompt.id}`} className="block relative w-full overflow-hidden">
+    <div className="group relative rounded-2xl overflow-hidden glass-card glass-card-hover flex flex-col cursor-pointer">
+      <Link
+        to={`/prompt/${prompt.id}`}
+        onClick={handleCardClick}
+        className="block relative w-full overflow-hidden"
+      >
         <div className={`w-full overflow-hidden relative bg-dark-950 ${getAspectRatioClass(prompt.aspectRatio)}`}>
           {/* Skeleton placeholder while image loads */}
           {!imageLoaded && !imageError && (
@@ -82,14 +77,14 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
               loading={priority ? 'eager' : 'lazy'}
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageError(true)}
-              className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${
+              className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-106 ${
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               }`}
             />
           )}
 
           {/* Overlay Gradient on Hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-dark-950 via-dark-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-dark-950/90 via-dark-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
           {/* Top Badges */}
           <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
@@ -108,7 +103,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
             <button
               onClick={handleFavoriteClick}
               aria-label={favorited ? 'Remove from favorites' : 'Save to favorites'}
-              className={`pointer-events-auto p-2 rounded-full backdrop-blur-md transition-all duration-200 transform active:scale-90 ${
+              className={`pointer-events-auto p-2 rounded-full backdrop-blur-md transition-all duration-200 transform active:scale-90 cursor-pointer ${
                 favorited
                   ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30'
                   : 'bg-dark-900/70 text-slate-300 hover:text-white hover:bg-dark-900 border border-white/10'
@@ -118,49 +113,36 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
             </button>
           </div>
 
-          {/* Quick Copy Button on Image (Desktop Hover / Mobile Visible) */}
-          <div className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <button
-              onClick={handleCopy}
-              title="Copy Prompt"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg backdrop-blur-md transition-transform active:scale-95"
-            >
-              {copied ? (
-                <>
-                  <Check className="w-3.5 h-3.5" /> Copied
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5" /> Copy Prompt
-                </>
-              )}
-            </button>
+          {/* Hover Hint: Click to view prompt */}
+          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 pointer-events-none flex items-center justify-between text-xs text-white">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-dark-900/80 backdrop-blur-md border border-white/10 text-[11px] font-medium">
+              <Eye className="w-3.5 h-3.5 text-purple-400" />
+              <span>View Prompt</span>
+            </span>
           </div>
         </div>
       </Link>
 
-      {/* Card Details */}
-      <div className="p-3.5 flex flex-col flex-grow justify-between gap-2">
+      {/* Card Details: Photo, Title, Category and Views (Protected - Prompt text hidden on feed) */}
+      <div className="p-3.5 flex flex-col flex-grow justify-between gap-1.5">
         <div>
           <div className="flex items-center justify-between text-[11px] font-medium text-purple-400 mb-1">
             <span className="truncate">{prompt.category}</span>
             {prompt.popularity > 0 && (
-              <span className="text-slate-400 text-[10px] shrink-0 font-normal">
-                ★ {(prompt.popularity / 1000).toFixed(1)}k
+              <span className="text-slate-400 text-[10px] shrink-0 font-normal flex items-center gap-1">
+                <Eye className="w-3 h-3 text-slate-500" />
+                <span>{(prompt.popularity / 1000).toFixed(1)}k views</span>
               </span>
             )}
           </div>
-          <Link to={`/prompt/${prompt.id}`}>
-            <h3 className="text-sm font-semibold text-slate-100 hover:text-purple-300 transition-colors line-clamp-1">
+          <Link to={`/prompt/${prompt.id}`} onClick={handleCardClick}>
+            <h3 className="text-sm font-semibold text-slate-100 group-hover:text-purple-300 transition-colors line-clamp-1">
               {prompt.title}
             </h3>
           </Link>
-          <p className="text-xs text-slate-400 line-clamp-2 mt-1 leading-relaxed">
-            {prompt.prompt}
-          </p>
         </div>
 
-        {/* Card Footer tags and quick action */}
+        {/* Card Footer: Category Tags (Prompt locked inside detail view) */}
         <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400">
           <div className="flex items-center gap-1 overflow-hidden">
             {prompt.tags.slice(0, 2).map((tag) => (
@@ -170,13 +152,13 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
             ))}
           </div>
 
-          <button
-            onClick={handleCopy}
-            className="text-purple-400 hover:text-purple-300 font-medium inline-flex items-center gap-1 transition-colors text-xs shrink-0"
+          <Link
+            to={`/prompt/${prompt.id}`}
+            onClick={handleCardClick}
+            className="text-purple-400 hover:text-purple-300 font-medium inline-flex items-center gap-1 text-[11px] shrink-0"
           >
-            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-            {copied ? 'Copied' : 'Copy'}
-          </button>
+            <span>Unlock Prompt →</span>
+          </Link>
         </div>
       </div>
     </div>

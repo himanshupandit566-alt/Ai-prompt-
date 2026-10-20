@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { saveRuntimeFirebaseConfig } from '../firebase';
+import { playClickSound, playPopSound } from '../utils/sound';
 import {
   Mail,
   Lock,
@@ -96,6 +97,7 @@ export const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    playClickSound();
     if (!validateInputs()) return;
 
     if (mode === 'signup') {
@@ -119,13 +121,14 @@ export const LoginPage: React.FC = () => {
         if (res.error === 'FIREBASE_NOT_CONFIGURED') {
           setFirebaseConfigModal(true);
         } else {
-          setErrorMessage('Password wrong or account not found! First sign up and then sign in.');
+          setErrorMessage('Account not found or invalid credentials! Pehle Sign Up karein, uske baad Sign In karein.');
         }
       }
     }
   };
 
   const handleGoogleSignIn = async () => {
+    playClickSound();
     setErrorMessage('');
     setEmailError('');
     setPasswordError('');
@@ -223,6 +226,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => {
+                playPopSound(0.05);
                 setMode('login');
                 setErrorMessage('');
                 setEmailError('');
@@ -239,6 +243,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => {
+                playPopSound(0.05);
                 setMode('signup');
                 setErrorMessage('');
                 setEmailError('');
@@ -271,7 +276,7 @@ export const LoginPage: React.FC = () => {
                     }}
                     className="px-2.5 py-1 rounded-lg bg-rose-500/25 hover:bg-rose-500/35 text-rose-200 font-semibold text-[11px] border border-rose-500/35 transition-all cursor-pointer"
                   >
-                    Sign Up Now →
+                    Pehle Sign Up Karein →
                   </button>
                 )}
                 <button
