@@ -11,7 +11,7 @@ export const BottomNav: React.FC = () => {
     { to: '/explore', label: 'Explore', icon: Compass },
     { to: '/favorites', label: 'Favorites', icon: Heart, badge: favorites.length },
     { to: '/category/all', label: 'Categories', icon: Grid },
-    { to: '/settings', label: 'Settings', icon: Settings },
+    { to: '/settings', label: 'Profile', icon: Settings },
   ];
 
   return (

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Heart, Settings, PlusCircle, Compass, Grid, Sparkles, X } from 'lucide-react';
+import { Search, Heart, Settings, PlusCircle, Compass, Grid, Sparkles, X, LogIn } from 'lucide-react';
 import { useFavorites } from '../context/FavoritesContext';
+import { useAuth } from '../context/AuthContext';
 
 export const Navbar: React.FC = () => {
   const { favorites } = useFavorites();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -143,6 +145,29 @@ export const Navbar: React.FC = () => {
                 </span>
               )}
             </Link>
+
+            {/* User Profile Avatar / Sign In Button */}
+            {isAuthenticated && user ? (
+              <Link
+                to="/settings"
+                title={`${user.displayName} (Profile & Settings)`}
+                className="flex items-center gap-2 p-0.5 rounded-full border border-purple-500/40 hover:border-purple-400 bg-gradient-to-tr from-purple-600 to-indigo-600 shadow-sm transition-all"
+              >
+                <img
+                  src={user.photoURL}
+                  alt={user.displayName}
+                  className="w-7 h-7 rounded-full object-cover bg-dark-950"
+                />
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold shadow-sm transition-all"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+              </Link>
+            )}
 
             {/* Settings */}
             <Link
