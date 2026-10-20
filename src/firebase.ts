@@ -34,9 +34,40 @@ export interface FirebaseClientConfig {
   storageBucket?: string;
   messagingSenderId?: string;
   appId?: string;
+  measurementId?: string;
 }
 
 const RUNTIME_CONFIG_KEY = 'fx_prompty_runtime_firebase_config';
+
+// Helper to strictly sanitize domain strings (strips http/https and trailing slashes to prevent iframe errors)
+const cleanDomain = (domain?: string): string => {
+  if (!domain) return '';
+  return domain
+    .trim()
+    .replace(/^https?:\/\//i, '')
+    .replace(/\/+$/, '');
+};
+
+const sanitizeConfig = (cfg: Partial<FirebaseClientConfig>): FirebaseClientConfig => {
+  const apiKey = (cfg.apiKey || '').trim();
+  const projectId = (cfg.projectId || '').trim();
+  let authDomain = cleanDomain(cfg.authDomain);
+
+  // If authDomain is not specified or clean, default to canonical <projectId>.firebaseapp.com
+  if (!authDomain && projectId) {
+    authDomain = `${projectId}.firebaseapp.com`;
+  }
+
+  return {
+    apiKey,
+    authDomain,
+    projectId,
+    storageBucket: cleanDomain(cfg.storageBucket) || `${projectId}.firebasestorage.app`,
+    messagingSenderId: (cfg.messagingSenderId || '').trim(),
+    appId: (cfg.appId || '').trim(),
+    measurementId: (cfg.measurementId || '').trim(),
+  };
+};
 
 // 1. Check runtime localStorage configuration first (allows instant setup in browser)
 export const getStoredFirebaseConfig = (): FirebaseClientConfig | null => {
@@ -45,7 +76,7 @@ export const getStoredFirebaseConfig = (): FirebaseClientConfig | null => {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed.apiKey && parsed.projectId) {
-        return parsed;
+        return sanitizeConfig(parsed);
       }
     }
   } catch (e) {
@@ -54,17 +85,19 @@ export const getStoredFirebaseConfig = (): FirebaseClientConfig | null => {
   return null;
 };
 
-// 2. Fall back to Vite environment variables from .env
-const envConfig: FirebaseClientConfig = {
+// 2. Read from Vite environment variables (.env)
+const envConfigRaw: Partial<FirebaseClientConfig> = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || '',
 };
 
-const activeConfig: FirebaseClientConfig = getStoredFirebaseConfig() || envConfig;
+const sanitizedEnvConfig = sanitizeConfig(envConfigRaw);
+const activeConfig: FirebaseClientConfig = getStoredFirebaseConfig() || sanitizedEnvConfig;
 
 // Validate configuration
 export const isFirebaseConfigured = Boolean(
@@ -77,8 +110,9 @@ export const isFirebaseConfigured = Boolean(
 let app: FirebaseApp | undefined;
 let auth: Auth | undefined;
 let db: Firestore | undefined;
+
 const googleProvider = new GoogleAuthProvider();
-// Force Google to show account selection picker every time
+// Force Google account picker so user can pick their desired Gmail
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 if (isFirebaseConfigured) {
@@ -87,15 +121,16 @@ if (isFirebaseConfigured) {
     auth = getAuth(app);
     db = getFirestore(app);
   } catch (err) {
-    console.warn('Firebase initialization error:', err);
+    console.warn('Firebase initialization notice:', err);
   }
 }
 
 // Function to save runtime Firebase config and re-initialize
 export const saveRuntimeFirebaseConfig = (config: FirebaseClientConfig): boolean => {
   try {
-    if (!config.apiKey || !config.projectId) return false;
-    localStorage.setItem(RUNTIME_CONFIG_KEY, JSON.stringify(config));
+    const sanitized = sanitizeConfig(config);
+    if (!sanitized.apiKey || !sanitized.projectId) return false;
+    localStorage.setItem(RUNTIME_CONFIG_KEY, JSON.stringify(sanitized));
     window.location.reload();
     return true;
   } catch (e) {

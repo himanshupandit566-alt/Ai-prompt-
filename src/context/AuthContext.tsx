@@ -8,6 +8,8 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   sendPasswordResetEmail,
   signOut,
   updateProfile,
@@ -19,7 +21,8 @@ import {
   doc,
   setDoc,
   getDoc,
-  deleteDoc
+  deleteDoc,
+  FirebaseUser
 } from '../firebase';
 
 interface AuthContextType {
@@ -39,7 +42,7 @@ interface AuthContextType {
 
 const AUTH_STORAGE_KEY = 'fx_prompty_current_user_v3';
 
-// Helper to convert Firebase Auth error codes into clean user messages
+// Helper to convert Firebase Auth error codes into clear user messages
 const getFirebaseFriendlyErrorMessage = (code: string, fallbackMessage?: string): string => {
   switch (code) {
     case 'auth/wrong-password':
@@ -57,13 +60,11 @@ const getFirebaseFriendlyErrorMessage = (code: string, fallbackMessage?: string)
     case 'auth/popup-closed-by-user':
       return 'Google Sign-In cancel kar diya gaya. Dobara prayas karein.';
     case 'auth/popup-blocked':
-      return 'Browser dwara Google popup block ho gaya. Kripya popups allow karein.';
-    case 'auth/too-many-requests':
-      return 'Bohot saare requests aaye hain. Kripya thodi der baad dobara prayas karein.';
+      return 'Popup browser dwara block ho gaya. Redirect mode se login kiya ja raha hai...';
+    case 'auth/unauthorized-domain':
+      return 'Ye domain Firebase Console me authorized nahi hai. Firebase Console -> Authentication -> Settings -> Authorized Domains me localhost aur apna Vercel domain add karein.';
     case 'auth/network-request-failed':
       return 'Network issue hai. Kripya apna internet connection check karein.';
-    case 'auth/unauthorized-domain':
-      return 'Ye domain Firebase Console me authorized nahi hai. Firebase Authentication -> Settings -> Authorized Domains me localhost/domain add karein.';
     default:
       return fallbackMessage || 'Authentication me samasya aayi. Kripya dobara try karein.';
   }
@@ -82,7 +83,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   });
 
-  // Initial loading is true to allow Firebase onAuthStateChanged to resolve session
+  // Loading state remains true until Firebase onAuthStateChanged confirms the session
   const [loading, setLoading] = useState(true);
 
   // Sync active user state to persistent local session
@@ -98,8 +99,54 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [user]);
 
+  // Helper to handle and sync real Firebase user data with Cloud Firestore
+  const syncFirebaseUserToState = async (fbUser: FirebaseUser): Promise<UserProfile> => {
+    let firestoreProfile: Partial<UserProfile> = {};
+
+    if (db) {
+      try {
+        const userDocRef = doc(db, 'users', fbUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          firestoreProfile = userDocSnap.data() as Partial<UserProfile>;
+        } else {
+          // Initialize fresh user document in Firestore on first login
+          const newDoc: UserProfile = {
+            uid: fbUser.uid,
+            displayName: fbUser.displayName || '',
+            email: fbUser.email || '',
+            photoURL: fbUser.photoURL || '',
+            dob: '',
+            pushNotifications: true,
+            createdAt: new Date().toISOString().split('T')[0],
+            bio: 'Creator on FX Prompty.',
+          };
+          await setDoc(userDocRef, newDoc, { merge: true });
+          firestoreProfile = newDoc;
+        }
+      } catch (err) {
+        console.warn('Firestore sync notice:', err);
+      }
+    }
+
+    const realProfile: UserProfile = {
+      uid: fbUser.uid,
+      displayName: firestoreProfile.displayName || fbUser.displayName || '',
+      email: fbUser.email || firestoreProfile.email || '',
+      photoURL: firestoreProfile.photoURL || fbUser.photoURL || '',
+      dob: firestoreProfile.dob || '',
+      pushNotifications: firestoreProfile.pushNotifications ?? true,
+      createdAt: firestoreProfile.createdAt || new Date().toISOString().split('T')[0],
+      bio: firestoreProfile.bio || 'Creator on FX Prompty.',
+    };
+
+    setUser(realProfile);
+    return realProfile;
+  };
+
   // ========================================================
-  // PERSISTENT SESSION LISTENER (Firebase onAuthStateChanged)
+  // PERSISTENT SESSION LISTENER (Firebase onAuthStateChanged & getRedirectResult)
   // ========================================================
   useEffect(() => {
     if (!isFirebaseConfigured || !auth) {
@@ -107,58 +154,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return;
     }
 
-    // Listens to real-time Firebase Auth state changes
+    // 1. Check for incoming redirect authentication result (e.g. mobile redirect fallback)
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result && result.user) {
+          await syncFirebaseUserToState(result.user);
+        }
+      })
+      .catch((err) => {
+        console.warn('Redirect auth result warning:', err);
+      });
+
+    // 2. Real-time persistent session listener
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser) {
         try {
-          let firestoreProfile: Partial<UserProfile> = {};
-
-          // Fetch real user document from Firestore (users/{uid})
-          if (db) {
-            try {
-              const userDocRef = doc(db, 'users', fbUser.uid);
-              const userDocSnap = await getDoc(userDocRef);
-
-              if (userDocSnap.exists()) {
-                firestoreProfile = userDocSnap.data() as Partial<UserProfile>;
-              } else {
-                // Initialize user document in Firestore on first login
-                const newDoc: UserProfile = {
-                  uid: fbUser.uid,
-                  displayName: fbUser.displayName || '',
-                  email: fbUser.email || '',
-                  photoURL: fbUser.photoURL || '',
-                  dob: '',
-                  pushNotifications: true,
-                  createdAt: new Date().toISOString().split('T')[0],
-                  bio: 'Creator on FX Prompty.',
-                };
-                await setDoc(userDocRef, newDoc, { merge: true });
-                firestoreProfile = newDoc;
-              }
-            } catch (err) {
-              console.warn('Firestore sync warning:', err);
-            }
-          }
-
-          // Real user data extracted from Google/Firebase
-          const realProfile: UserProfile = {
-            uid: fbUser.uid,
-            displayName: firestoreProfile.displayName || fbUser.displayName || '',
-            email: fbUser.email || firestoreProfile.email || '',
-            photoURL: firestoreProfile.photoURL || fbUser.photoURL || '',
-            dob: firestoreProfile.dob || '',
-            pushNotifications: firestoreProfile.pushNotifications ?? true,
-            createdAt: firestoreProfile.createdAt || new Date().toISOString().split('T')[0],
-            bio: firestoreProfile.bio || 'Creator on FX Prompty.',
-          };
-
-          setUser(realProfile);
+          await syncFirebaseUserToState(fbUser);
         } catch (err) {
-          console.error('Error resolving user profile:', err);
+          console.error('Error in onAuthStateChanged:', err);
         }
       } else {
-        // Firebase confirmed user is logged out
         setUser(null);
       }
       setLoading(false);
@@ -168,7 +183,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   // ========================================================
-  // 1. REAL GOOGLE SIGN-IN INTEGRATION (Native Dialog / Popup)
+  // 1. REAL GOOGLE SIGN-IN (Popup with Automatic Redirect Fallback)
   // ========================================================
   const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
     setLoading(true);
@@ -182,46 +197,36 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     try {
-      // Pops up Google's Native Account Picker dialogue
+      // 1. Primary: Native popup account picker
       const result = await signInWithPopup(auth, googleProvider);
-      const fbUser = result.user;
+      if (result && result.user) {
+        await syncFirebaseUserToState(result.user);
+        setLoading(false);
+        return { success: true };
+      }
+      setLoading(false);
+      return { success: false, error: 'User data not returned' };
+    } catch (err: any) {
+      console.warn('Popup login attempt error:', err.code, err.message);
 
-      // Extract real details from Google Account
-      const realName = fbUser.displayName || '';
-      const realEmail = fbUser.email || '';
-      const realPhoto = fbUser.photoURL || '';
-
-      const userProfile: UserProfile = {
-        uid: fbUser.uid,
-        displayName: realName,
-        email: realEmail,
-        photoURL: realPhoto,
-        dob: '',
-        pushNotifications: true,
-        createdAt: new Date().toISOString().split('T')[0],
-        bio: 'Connected with Google on FX Prompty.',
-      };
-
-      // Save / Update in Cloud Firestore: users/{uid}
-      if (db) {
+      // 2. Fallback: If popup is blocked by browser or iframe policy, fallback to signInWithRedirect
+      if (
+        err.code === 'auth/popup-blocked' ||
+        err.code === 'auth/cancelled-popup-request' ||
+        err.message?.includes('iframe') ||
+        err.message?.includes('popup')
+      ) {
         try {
-          const userDocRef = doc(db, 'users', fbUser.uid);
-          const snap = await getDoc(userDocRef);
-          if (snap.exists()) {
-            const existing = snap.data() as UserProfile;
-            userProfile.dob = existing.dob || '';
-            userProfile.pushNotifications = existing.pushNotifications ?? true;
-          }
-          await setDoc(userDocRef, userProfile, { merge: true });
-        } catch (err) {
-          console.warn('Firestore save notice:', err);
+          console.info('Switching to signInWithRedirect fallback...');
+          await signInWithRedirect(auth, googleProvider);
+          return { success: true };
+        } catch (redirectErr: any) {
+          setLoading(false);
+          const friendlyMessage = getFirebaseFriendlyErrorMessage(redirectErr.code, redirectErr.message);
+          return { success: false, error: friendlyMessage };
         }
       }
 
-      setUser(userProfile);
-      setLoading(false);
-      return { success: true };
-    } catch (err: any) {
       setLoading(false);
       const friendlyMessage = getFirebaseFriendlyErrorMessage(err.code, err.message);
       return { success: false, error: friendlyMessage };
@@ -258,30 +263,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       const userCred = await signInWithEmailAndPassword(auth, cleanEmail, password);
-      const fbUser = userCred.user;
-
-      let profile: UserProfile = {
-        uid: fbUser.uid,
-        displayName: fbUser.displayName || '',
-        email: fbUser.email || cleanEmail,
-        photoURL: fbUser.photoURL || '',
-        dob: '',
-        pushNotifications: true,
-        createdAt: new Date().toISOString().split('T')[0],
-      };
-
-      if (db) {
-        try {
-          const snap = await getDoc(doc(db, 'users', fbUser.uid));
-          if (snap.exists()) {
-            profile = { ...profile, ...(snap.data() as Partial<UserProfile>) };
-          }
-        } catch (e) {
-          console.warn(e);
-        }
-      }
-
-      setUser(profile);
+      await syncFirebaseUserToState(userCred.user);
       setLoading(false);
       return { success: true };
     } catch (err: any) {
@@ -479,7 +461,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     setUser(null);
     localStorage.removeItem(AUTH_STORAGE_KEY);
-    // Remove welcome dismiss flag so fresh login/welcome appears smoothly
     localStorage.removeItem('fx_prompty_welcome_dismissed');
     setLoading(false);
   };
