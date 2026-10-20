@@ -8,24 +8,27 @@ export interface ShareResult {
 }
 
 /**
- * Shares a prompt using the device's native Web Share API where supported.
- * Falls back to clipboard copying when Web Share API is not supported.
+ * Shares a prompt using the device's native Web Share API (navigator.share).
+ * Shares the prompt title and direct app URL.
+ * Falls back to clipboard copying when Web Share API is not available.
  */
 export async function sharePrompt(item: PromptItem): Promise<ShareResult> {
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+
   const shareData: ShareData = {
-    title: `FX Prompty: ${item.title}`,
-    text: `"${item.title}" (${item.category})\n\nPrompt: ${item.prompt}`,
-    url: window.location.href,
+    title: `${item.title} - FX Prompty`,
+    text: `Check out "${item.title}" on FX Prompty:`,
+    url: currentUrl,
   };
 
-  // Try native Web Share API (commonly available on Android, iOS, modern macOS)
-  if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+  // Try native Web Share API (Android, iOS, mobile Chrome, Safari)
+  if (typeof navigator !== 'undefined' && navigator.share) {
     try {
       await navigator.share(shareData);
       return {
         success: true,
         method: 'native',
-        message: 'Shared successfully!',
+        message: 'Shared successfully! 🚀',
       };
     } catch (err: unknown) {
       if ((err as Error).name === 'AbortError') {
@@ -35,26 +38,23 @@ export async function sharePrompt(item: PromptItem): Promise<ShareResult> {
           message: 'Share cancelled',
         };
       }
-      // If native sharing fails for another reason, fallback below
     }
   }
 
-  // Fallback: Copy the shareable text to clipboard
-  const copied = await copyToClipboard(
-    `FX Prompty - ${item.title}\nCategory: ${item.category}\n\nPrompt:\n${item.prompt}\n\nExplore more at: ${window.location.origin}/prompt/${item.id}`
-  );
+  // Fallback: Copy direct prompt link to clipboard
+  const copied = await copyToClipboard(currentUrl);
 
   if (copied) {
     return {
       success: true,
       method: 'clipboard',
-      message: 'Native share not available. Prompt link copied to clipboard!',
+      message: 'Prompt link copied to clipboard! 📋',
     };
   }
 
   return {
     success: false,
     method: 'error',
-    message: 'Unable to share or copy prompt.',
+    message: 'Unable to share or copy link.',
   };
 }

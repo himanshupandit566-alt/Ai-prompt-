@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Sparkles, Image as ImageIcon, Eye } from 'lucide-react';
+import { Heart, Sparkles, Image as ImageIcon, Eye, ArrowRight } from 'lucide-react';
 import { PromptItem } from '../types/prompt';
 import { useFavorites } from '../context/FavoritesContext';
 import { playClickSound, playPopSound } from '../utils/sound';
@@ -142,22 +142,15 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
           </Link>
         </div>
 
-        {/* Card Footer: Category Tags (Prompt locked inside detail view) */}
-        <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400">
-          <div className="flex items-center gap-1 overflow-hidden">
-            {prompt.tags.slice(0, 2).map((tag) => (
-              <span key={tag} className="px-1.5 py-0.5 rounded bg-dark-800 text-slate-400 text-[10px] truncate">
-                #{tag}
-              </span>
-            ))}
-          </div>
-
+        {/* Card Footer: Clean View Details Button (Zero prompt text leakage) */}
+        <div className="pt-2.5 border-t border-slate-800/60">
           <Link
             to={`/prompt/${prompt.id}`}
             onClick={handleCardClick}
-            className="text-purple-400 hover:text-purple-300 font-medium inline-flex items-center gap-1 text-[11px] shrink-0"
+            className="w-full py-2 px-3 rounded-xl bg-purple-600/10 hover:bg-purple-600/20 border border-purple-500/25 hover:border-purple-500/40 text-purple-300 hover:text-white font-semibold text-xs inline-flex items-center justify-center gap-1.5 transition-all group/btn"
           >
-            <span>Unlock Prompt →</span>
+            <span>View Details</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
           </Link>
         </div>
       </div>

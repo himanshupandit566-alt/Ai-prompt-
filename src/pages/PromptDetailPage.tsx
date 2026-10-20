@@ -144,13 +144,15 @@ export const PromptDetailPage: React.FC = () => {
         </button>
 
         <div className="flex items-center gap-2">
-          {/* Share Button */}
+          {/* Native Share Button */}
           <button
             onClick={handleShare}
             aria-label="Share prompt"
-            className="p-2.5 rounded-xl bg-dark-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-dark-850 transition-colors cursor-pointer"
+            title="Share prompt title & link"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-dark-900 hover:bg-dark-850 border border-slate-800 hover:border-purple-500/40 text-slate-300 hover:text-white text-xs font-semibold transition-all shadow-sm cursor-pointer"
           >
-            <Share2 className="w-4 h-4" />
+            <Share2 className="w-4 h-4 text-purple-400" />
+            <span className="hidden sm:inline">Share</span>
           </button>
 
           {/* Download TXT Button (Locked behind auth) */}
@@ -273,26 +275,56 @@ export const PromptDetailPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Prompt text box with click-to-copy handler */}
-            <div
-              onClick={handleCopyPrompt}
-              title={isAuthenticated ? 'Click to copy prompt' : 'Sign in to copy prompt'}
-              className="bg-dark-950 rounded-2xl p-4 border border-slate-800/80 text-slate-100 text-sm sm:text-base leading-relaxed font-mono select-all whitespace-pre-wrap break-words max-h-96 overflow-y-auto cursor-pointer hover:border-purple-500/50 transition-colors"
-            >
-              {prompt.prompt}
+            {/* Prompt Text Box with Guest Blur-to-Lock Overlay */}
+            <div className="relative rounded-2xl overflow-hidden border border-slate-800/80">
+              {/* Actual Prompt Text (Blurred & non-selectable when unauthenticated) */}
+              <div
+                onClick={handleCopyPrompt}
+                title={isAuthenticated ? 'Click to copy prompt' : 'Sign in to reveal and copy'}
+                className={`bg-dark-950 p-4 sm:p-5 text-sm sm:text-base leading-relaxed font-mono whitespace-pre-wrap break-words max-h-96 overflow-y-auto transition-all ${
+                  isAuthenticated
+                    ? 'text-slate-100 select-all cursor-pointer hover:border-purple-500/50'
+                    : 'text-slate-300 filter blur-[6px] select-none pointer-events-none opacity-30'
+                }`}
+              >
+                {prompt.prompt}
+              </div>
+
+              {/* Centered Lock Badge Overlay for Guests */}
+              {!isAuthenticated && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-5 bg-dark-950/75 backdrop-blur-sm text-center select-none">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-600/20 text-purple-400 border border-purple-500/30 flex items-center justify-center mb-3 shadow-[0_0_20px_rgba(168,85,247,0.35)] animate-pulse-subtle">
+                    <Lock className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm sm:text-base font-bold text-white mb-1.5 flex items-center gap-1.5">
+                    <span>🔒 Sign In to Reveal &amp; Copy Full Prompt</span>
+                  </h4>
+                  <p className="text-xs text-slate-400 max-w-sm mb-4 leading-relaxed">
+                    Prompt details and 1-tap copy are locked for authenticated creators. Sign in or register in seconds to reveal the full text.
+                  </p>
+                  <Link
+                    to="/login"
+                    onClick={() => playClickSound()}
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-600/35 hover:shadow-purple-600/55 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                  >
+                    <LogIn className="w-3.5 h-3.5" />
+                    <span>Sign In to Unlock Prompt →</span>
+                  </Link>
+                </div>
+              )}
             </div>
 
             <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
               <span>{prompt.prompt.length} characters</span>
               <span className="text-purple-400 text-[11px]">
-                {isAuthenticated ? 'Click box or button to 1-tap copy' : 'Sign In required to unlock copy'}
+                {isAuthenticated ? 'Click box or button to 1-tap copy' : '🔒 Protected prompt'}
               </span>
             </div>
           </div>
 
           {/* OPTIONAL NEGATIVE PROMPT */}
           {prompt.negativePrompt && prompt.negativePrompt.trim().length > 0 && (
-            <div className="bg-dark-900/90 border border-rose-950/40 rounded-2xl p-5 shadow-lg">
+            <div className="bg-dark-900/90 border border-rose-950/40 rounded-2xl p-5 shadow-lg relative overflow-hidden">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
                   Negative Prompt (What to Avoid)
@@ -313,11 +345,32 @@ export const PromptDetailPage: React.FC = () => {
                   )}
                 </button>
               </div>
-              <div
-                onClick={handleCopyNegative}
-                className="bg-dark-950 rounded-xl p-3.5 border border-slate-800/80 text-slate-300 text-xs sm:text-sm font-mono select-all leading-relaxed whitespace-pre-wrap cursor-pointer hover:border-rose-500/40"
-              >
-                {prompt.negativePrompt}
+
+              {/* Negative prompt box with blur when not authenticated */}
+              <div className="relative rounded-xl overflow-hidden border border-slate-800/80">
+                <div
+                  onClick={handleCopyNegative}
+                  className={`bg-dark-950 p-3.5 text-xs sm:text-sm font-mono leading-relaxed whitespace-pre-wrap transition-all ${
+                    isAuthenticated
+                      ? 'text-slate-300 select-all cursor-pointer hover:border-rose-500/40'
+                      : 'text-slate-300 filter blur-[6px] select-none pointer-events-none opacity-30'
+                  }`}
+                >
+                  {prompt.negativePrompt}
+                </div>
+
+                {!isAuthenticated && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center p-3 bg-dark-950/75 backdrop-blur-sm select-none text-center">
+                    <Link
+                      to="/login"
+                      onClick={() => playClickSound()}
+                      className="px-3.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-300 hover:text-white font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <Lock className="w-3.5 h-3.5" />
+                      <span>Sign In to Reveal Negative Prompt</span>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           )}
