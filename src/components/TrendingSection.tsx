@@ -2,17 +2,16 @@ import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { PromptItem } from '../types/prompt';
 import { useFavorites } from '../context/FavoritesContext';
-import { Flame, Heart, ChevronLeft, ChevronRight, Copy, Check } from 'lucide-react';
-import { copyToClipboard } from '../utils/clipboard';
+import { Flame, Heart, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { playClickSound, playPopSound } from '../utils/sound';
 
 interface TrendingSectionProps {
   prompts: PromptItem[];
 }
 
 export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => {
-  const { isFavorite, toggleFavorite, showToast } = useFavorites();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [copiedId, setCopiedId] = React.useState<string | null>(null);
 
   const trendingPrompts = prompts
     .filter((p) => p.featured || p.popularity > 8000)
@@ -20,20 +19,10 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
     .slice(0, 10);
 
   const scroll = (direction: 'left' | 'right') => {
+    playClickSound();
     if (scrollRef.current) {
       const offset = direction === 'left' ? -300 : 300;
       scrollRef.current.scrollBy({ left: offset, behavior: 'smooth' });
-    }
-  };
-
-  const handleCopy = async (e: React.MouseEvent, prompt: PromptItem) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const ok = await copyToClipboard(prompt.prompt);
-    if (ok) {
-      setCopiedId(prompt.id);
-      showToast('Prompt copied! ✨', 'success');
-      setTimeout(() => setCopiedId(null), 2000);
     }
   };
 
@@ -50,7 +39,7 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
               Trending Prompts
             </h2>
             <p className="text-xs text-slate-400 hidden sm:block">
-              Most saved and copied community visual concepts this week
+              Most saved community visual concepts this week
             </p>
           </div>
         </div>
@@ -60,14 +49,14 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
           <button
             onClick={() => scroll('left')}
             aria-label="Scroll trending left"
-            className="w-8 h-8 rounded-full bg-dark-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-dark-800 transition-colors"
+            className="w-8 h-8 rounded-full bg-dark-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-dark-800 transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => scroll('right')}
             aria-label="Scroll trending right"
-            className="w-8 h-8 rounded-full bg-dark-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-dark-800 transition-colors"
+            className="w-8 h-8 rounded-full bg-dark-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-dark-800 transition-colors cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -81,14 +70,17 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
       >
         {trendingPrompts.map((prompt) => {
           const favorited = isFavorite(prompt.id);
-          const isCopied = copiedId === prompt.id;
 
           return (
             <div
               key={prompt.id}
               className="group shrink-0 w-64 sm:w-72 bg-dark-900 rounded-2xl border border-slate-800/80 hover:border-purple-500/40 overflow-hidden flex flex-col justify-between shadow-lg hover:shadow-glow-purple transition-all duration-300"
             >
-              <Link to={`/prompt/${prompt.id}`} className="block relative aspect-[4/5] overflow-hidden bg-dark-950">
+              <Link
+                to={`/prompt/${prompt.id}`}
+                onClick={() => playClickSound()}
+                className="block relative aspect-[4/5] overflow-hidden bg-dark-950"
+              >
                 <img
                   src={prompt.thumbnailUrl}
                   alt={prompt.title}
@@ -108,10 +100,11 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    playPopSound();
                     toggleFavorite(prompt.id);
                   }}
                   aria-label="Toggle favorite"
-                  className={`absolute top-2.5 right-2.5 p-2 rounded-full backdrop-blur-md transition-all ${
+                  className={`absolute top-2.5 right-2.5 p-2 rounded-full backdrop-blur-md transition-all cursor-pointer ${
                     favorited
                       ? 'bg-rose-500 text-white'
                       : 'bg-black/60 text-slate-300 hover:text-white border border-white/10'
@@ -131,16 +124,19 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
                 </div>
               </Link>
 
-              {/* Quick Action Footer */}
+              {/* Quick Action Footer: Clean View Details Link (Zero prompt text leakage) */}
               <div className="p-3 bg-dark-900 flex items-center justify-between border-t border-slate-800/60">
-                <span className="text-[11px] text-slate-400">{prompt.aspectRatio}</span>
-                <button
-                  onClick={(e) => handleCopy(e, prompt)}
-                  className="flex items-center gap-1 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors"
+                <span className="text-[11px] text-slate-400 font-medium px-2 py-0.5 rounded-md bg-dark-950 border border-slate-800">
+                  {prompt.aspectRatio}
+                </span>
+                <Link
+                  to={`/prompt/${prompt.id}`}
+                  onClick={() => playClickSound()}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/30 text-purple-300 hover:text-white text-xs font-semibold transition-all group/btn"
                 >
-                  {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {isCopied ? 'Copied' : 'Copy Prompt'}
-                </button>
+                  <span>View Details</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
+                </Link>
               </div>
             </div>
           );
