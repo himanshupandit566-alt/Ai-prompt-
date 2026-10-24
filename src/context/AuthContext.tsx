@@ -47,39 +47,41 @@ const GUEST_STORAGE_KEY = 'fx_prompty_is_guest';
 
 // Helper to convert Firebase Auth error codes into clear user messages
 const getFirebaseFriendlyErrorMessage = (code: string, fallbackMessage?: string): string => {
-  switch (code) {
+  const normalizedCode = code || (fallbackMessage && fallbackMessage.match(/auth\/[a-zA-Z0-9-]+/)?.[0]) || '';
+  switch (normalizedCode) {
     case 'auth/operation-not-allowed':
       return 'Email/Password sign-in Firebase Console me enabled nahi hai. Kripya Firebase Console > Authentication > Sign-in method me jakar "Email/Password" enable karein, ya fir Google se 1-click Sign In karein.';
     case 'auth/user-not-found':
-      return 'Account nahi mila, please sign up karein (Sign up please)';
-    case 'auth/wrong-password':
-      return 'Galat password ya email!';
     case 'auth/invalid-credential':
     case 'auth/invalid-login-credentials':
-      return 'Galat password ya email! Pehle check karein ya Sign Up karein.';
-    case 'auth/email-already-in-use':
-      return 'Is email se pehle se account bana hua hai. Kripya Sign In karein.';
+      return "Can't Find account. Please check your email or Sign Up first.";
+    case 'auth/wrong-password':
+      return 'Incorrect password. Please try again.';
     case 'auth/invalid-email':
-      return 'Kripya ek valid email address enter karein.';
+      return 'Please enter a valid email address.';
+    case 'auth/too-many-requests':
+      return 'Too many failed attempts. Please try again later.';
+    case 'auth/email-already-in-use':
+      return 'This email is already registered. Please Sign In.';
     case 'auth/weak-password':
-      return 'Password kam se kam 6 characters ka hona chahiye.';
+      return 'Password must be at least 6 characters.';
     case 'auth/popup-closed-by-user':
-      return 'Google Sign-In cancel kar diya gaya. Dobara prayas karein.';
+      return 'Google Sign-In was cancelled. Please try again.';
     case 'auth/popup-blocked':
-      return 'Popup browser dwara block ho gaya. Redirect mode se login kiya ja raha hai...';
+      return 'Popup was blocked by the browser. Redirecting to Google Sign-In...';
     case 'auth/unauthorized-domain':
-      return 'Ye domain Firebase Console me authorized nahi hai. Firebase Console -> Authentication -> Settings -> Authorized Domains me localhost aur apna Vercel domain add karein.';
+      return 'This domain is not authorized in Firebase Console. Please add it to Authorized Domains in Firebase Authentication Settings.';
     case 'auth/api-key-not-valid':
     case 'auth/invalid-api-key':
-      return 'Firebase API Key invalid hai. Kripya Firebase Console (Project Settings -> General) me jakar apna real "Web API Key" check karein aur .env me update karein.';
+      return 'Firebase API Key is invalid. Please check your Firebase configuration.';
     case 'auth/network-request-failed':
-      return 'Network issue hai. Kripya apna internet connection check karein.';
+      return 'Network error. Please check your internet connection.';
     default:
       // Never show raw technical "Firebase: Error (...)"
       if (fallbackMessage && !fallbackMessage.toLowerCase().includes('firebase') && !fallbackMessage.includes('auth/')) {
         return fallbackMessage;
       }
-      return 'Kuch galat hua. Kripya punah prayas karein.';
+      return "Can't Find account. Please check your email or Sign Up first.";
   }
 };
 
@@ -282,12 +284,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (!cleanEmail) {
       setLoading(false);
-      return { success: false, error: 'Kripya ek valid email address enter karein.' };
+      return { success: false, error: 'Please enter a valid email address.', code: 'auth/invalid-email' };
     }
 
     if (!password) {
       setLoading(false);
-      return { success: false, error: 'Kripya apna password enter karein.' };
+      return { success: false, error: 'Please enter your password.', code: 'auth/wrong-password' };
     }
 
     if (!isFirebaseConfigured || !auth) {
@@ -311,8 +313,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return { success: true };
     } catch (err: any) {
       setLoading(false);
-      const friendlyMessage = getFirebaseFriendlyErrorMessage(err.code, err.message);
-      return { success: false, error: friendlyMessage, code: err.code };
+      const code = err.code || (err.message && err.message.match(/auth\/[a-zA-Z0-9-]+/)?.[0]) || '';
+      const friendlyMessage = getFirebaseFriendlyErrorMessage(code, err.message);
+      return { success: false, error: friendlyMessage, code };
     }
   };
 
@@ -330,12 +333,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (!cleanEmail) {
       setLoading(false);
-      return { success: false, error: 'Kripya ek valid email address enter karein.' };
+      return { success: false, error: 'Please enter a valid email address.', code: 'auth/invalid-email' };
     }
 
     if (password.length < 6) {
       setLoading(false);
-      return { success: false, error: 'Password kam se kam 6 characters ka hona chahiye.' };
+      return { success: false, error: 'Password must be at least 6 characters.', code: 'auth/weak-password' };
     }
 
     if (!isFirebaseConfigured || !auth) {

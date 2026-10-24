@@ -43,6 +43,7 @@ export const LoginPage: React.FC = () => {
 
   // Error & Status Messages
   const [errorMessage, setErrorMessage] = useState('');
+  const [errorKey, setErrorKey] = useState(0);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
@@ -76,27 +77,29 @@ export const LoginPage: React.FC = () => {
     setErrorMessage('');
 
     if (!email.trim()) {
-      setEmailError('Kripya ek valid email address enter karein.');
+      setEmailError('Please enter a valid email address.');
       isValid = false;
     } else if (!isValidEmail(email.trim())) {
-      setEmailError('Kripya ek valid email address enter karein.');
+      setEmailError('Please enter a valid email address.');
       isValid = false;
     }
 
     if (!password) {
-      setPasswordError('Kripya password enter karein.');
+      setPasswordError('Please enter your password.');
       isValid = false;
     } else if (password.length < 6) {
-      setPasswordError('Password kam se kam 6 characters ka hona chahiye.');
+      setPasswordError('Password must be at least 6 characters.');
       isValid = false;
     }
 
     if (mode === 'signup') {
       if (!displayName.trim()) {
-        setErrorMessage('Kripya apna poora naam enter karein.');
+        setErrorMessage('Please enter your full name.');
+        setErrorKey((k) => k + 1);
         isValid = false;
       } else if (password !== confirmPassword) {
-        setErrorMessage('Passwords match nahi ho rahe hain.');
+        setErrorMessage('Passwords do not match.');
+        setErrorKey((k) => k + 1);
         isValid = false;
       }
     }
@@ -112,17 +115,36 @@ export const LoginPage: React.FC = () => {
     if (mode === 'signup') {
       const res = await signUpWithEmail(displayName, email, password);
       if (res.success) {
-        showToast(`Account successfully ban gaya! Welcome ${displayName}! 🎉`, 'success');
+        showToast(`Account successfully created! Welcome ${displayName}! 🎉`, 'success');
         navigate('/');
       } else {
         if (res.error === 'FIREBASE_NOT_CONFIGURED') {
           setFirebaseConfigModal(true);
         } else if (res.code === 'auth/operation-not-allowed') {
-          setErrorMessage('Email/Password registration Firebase Console me enabled nahi hai. Kripya Firebase Console > Authentication > Sign-in method me jakar "Email/Password" enable karein, ya fir Google se 1-click Sign In karein.');
+          const msg = 'Email/Password registration is not enabled in Firebase Console. Please enable "Email/Password" in Firebase Console > Authentication > Sign-in method, or use 1-click Google Sign In.';
+          setErrorMessage(msg);
+          setErrorKey((k) => k + 1);
+          showToast(msg, 'error');
         } else if (res.code === 'auth/email-already-in-use') {
-          setErrorMessage('Is email se pehle se account bana hua hai. Kripya Sign In karein.');
+          const msg = 'This email is already registered. Please Sign In.';
+          setErrorMessage(msg);
+          setErrorKey((k) => k + 1);
+          showToast(msg, 'error');
+        } else if (res.code === 'auth/invalid-email') {
+          const msg = 'Please enter a valid email address.';
+          setErrorMessage(msg);
+          setErrorKey((k) => k + 1);
+          showToast(msg, 'error');
+        } else if (res.code === 'auth/weak-password') {
+          const msg = 'Password must be at least 6 characters.';
+          setErrorMessage(msg);
+          setErrorKey((k) => k + 1);
+          showToast(msg, 'error');
         } else {
-          setErrorMessage(res.error || 'Kuch galat hua. Kripya punah prayas karein.');
+          const msg = res.error || 'Account creation failed. Please try again.';
+          setErrorMessage(msg);
+          setErrorKey((k) => k + 1);
+          showToast(msg, 'error');
         }
       }
     } else {
@@ -134,17 +156,39 @@ export const LoginPage: React.FC = () => {
         if (res.error === 'FIREBASE_NOT_CONFIGURED') {
           setFirebaseConfigModal(true);
         } else if (res.code === 'auth/operation-not-allowed') {
-          setErrorMessage('Email/Password sign-in Firebase Console me enabled nahi hai. Kripya Firebase Console > Authentication > Sign-in method me jakar "Email/Password" enable karein, ya fir Google se 1-click Sign In karein.');
-        } else if (res.code === 'auth/user-not-found') {
-          setErrorMessage('Account nahi mila, please sign up karein (Sign up please)');
+          const msg = 'Email/Password sign-in is not enabled in Firebase Console. Please enable "Email/Password" in Firebase Console > Authentication > Sign-in method, or use 1-click Google Sign In.';
+          setErrorMessage(msg);
+          setErrorKey((k) => k + 1);
+          showToast(msg, 'error');
         } else if (res.code === 'auth/wrong-password') {
-          setErrorMessage('Galat password ya email!');
-        } else if (res.code === 'auth/invalid-credential' || res.code === 'auth/invalid-login-credentials') {
-          setErrorMessage('Galat password ya email! Pehle check karein ya Sign Up karein.');
+          const msg = 'Incorrect password. Please try again.';
+          setErrorMessage(msg);
+          setErrorKey((k) => k + 1);
+          showToast(msg, 'error');
+        } else if (res.code === 'auth/invalid-email') {
+          const msg = 'Please enter a valid email address.';
+          setErrorMessage(msg);
+          setErrorKey((k) => k + 1);
+          showToast(msg, 'error');
+        } else if (res.code === 'auth/too-many-requests') {
+          const msg = 'Too many failed attempts. Please try again later.';
+          setErrorMessage(msg);
+          setErrorKey((k) => k + 1);
+          showToast(msg, 'error');
+        } else if (
+          res.code === 'auth/user-not-found' ||
+          res.code === 'auth/invalid-credential' ||
+          res.code === 'auth/invalid-login-credentials'
+        ) {
+          const msg = "Can't Find account. Please check your email or Sign Up first.";
+          setErrorMessage(msg);
+          setErrorKey((k) => k + 1);
+          showToast(msg, 'error');
         } else {
-          setErrorMessage(
-            res.error || 'Kuch galat hua. Kripya punah prayas karein.'
-          );
+          const msg = res.error || "Can't Find account. Please check your email or Sign Up first.";
+          setErrorMessage(msg);
+          setErrorKey((k) => k + 1);
+          showToast(msg, 'error');
         }
       }
     }
@@ -278,54 +322,6 @@ export const LoginPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Strict Clear Red Alert Box */}
-          {errorMessage && (
-            <div className="mb-5 p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-rose-200 text-xs flex flex-col gap-2.5 modal-spring shadow-lg shadow-rose-950/30">
-              <div className="flex items-start justify-between gap-2.5">
-                <div className="flex items-start gap-2.5 flex-1">
-                  <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                  <div className="font-medium leading-relaxed">{errorMessage}</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setErrorMessage('')}
-                  className="text-rose-400 hover:text-rose-200 p-0.5 cursor-pointer shrink-0"
-                  title="Close alert"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              {/* Action Buttons inside Alert */}
-              <div className="flex flex-wrap items-center justify-end gap-2 pt-1 border-t border-rose-500/20">
-                {/* Google Sign In Quick Action if Email/Password is disabled in Firebase */}
-                {errorMessage.includes('Firebase Console me enabled nahi hai') && (
-                  <button
-                    type="button"
-                    onClick={handleGoogleSignIn}
-                    className="px-3 py-1.5 rounded-lg bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5"
-                  >
-                    <span>Continue with Google (1-Tap) →</span>
-                  </button>
-                )}
-
-                {/* Sign Up switch action */}
-                {(mode === 'login' && (errorMessage.includes('Sign up') || errorMessage.includes('sign up') || errorMessage.includes('exist nahi karta'))) && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode('signup');
-                      setErrorMessage('');
-                    }}
-                    className="px-3 py-1.5 rounded-lg bg-rose-500/25 hover:bg-rose-500/35 text-rose-200 font-semibold text-xs border border-rose-500/35 transition-all cursor-pointer"
-                  >
-                    Pehle Sign Up Karein →
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Display Name (Only in Sign Up mode) */}
@@ -340,7 +336,10 @@ export const LoginPage: React.FC = () => {
                     type="text"
                     required
                     value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
+                    onChange={(e) => {
+                      setDisplayName(e.target.value);
+                      if (errorMessage) setErrorMessage('');
+                    }}
                     placeholder="Enter your full name"
                     className="w-full pl-10 pr-4 py-2.5 bg-[#f1f5f9] dark:bg-[#07080B] border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                   />
@@ -362,6 +361,7 @@ export const LoginPage: React.FC = () => {
                   onChange={(e) => {
                     setEmail(e.target.value);
                     if (emailError) setEmailError('');
+                    if (errorMessage) setErrorMessage('');
                   }}
                   placeholder="name@example.com"
                   className={`w-full pl-10 pr-4 py-2.5 bg-[#f1f5f9] dark:bg-[#07080B] border rounded-xl text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-colors ${
@@ -409,6 +409,7 @@ export const LoginPage: React.FC = () => {
                   onChange={(e) => {
                     setPassword(e.target.value);
                     if (passwordError) setPasswordError('');
+                    if (errorMessage) setErrorMessage('');
                   }}
                   placeholder="At least 6 characters"
                   className={`w-full pl-10 pr-10 py-2.5 bg-[#f1f5f9] dark:bg-[#07080B] border rounded-xl text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-colors ${
@@ -445,7 +446,10 @@ export const LoginPage: React.FC = () => {
                     type={showConfirmPassword ? 'text' : 'password'}
                     required
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      if (errorMessage) setErrorMessage('');
+                    }}
                     placeholder="Re-enter password"
                     className="w-full pl-10 pr-10 py-2.5 bg-[#f1f5f9] dark:bg-[#07080B] border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                   />
@@ -457,6 +461,69 @@ export const LoginPage: React.FC = () => {
                     {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+              </div>
+            )}
+
+            {/* PROMINENT RED ERROR MESSAGE BANNER - RIGHT BELOW INPUT FIELDS */}
+            {errorMessage && (
+              <div
+                key={`err-${errorKey}`}
+                className="p-3.5 rounded-2xl border text-xs sm:text-sm font-medium animate-error-shake shadow-sm flex flex-col gap-2 transition-all"
+                style={{
+                  backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                  borderColor: '#ef4444',
+                  color: '#ef4444',
+                }}
+                role="alert"
+              >
+                <div className="flex items-start justify-between gap-2.5">
+                  <div className="flex items-start gap-2.5 flex-1">
+                    <span className="text-base shrink-0 leading-none select-none">⚠️</span>
+                    <div className="leading-snug font-semibold text-[#ef4444]">
+                      {errorMessage}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setErrorMessage('')}
+                    className="text-[#ef4444] hover:opacity-75 p-0.5 cursor-pointer shrink-0 transition-opacity"
+                    title="Dismiss alert"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Direct 1-Click CTA to Sign Up if Account Not Found */}
+                {mode === 'login' && (errorMessage.includes('Sign Up') || errorMessage.includes("Can't Find account") || errorMessage.includes('sign up')) && (
+                  <div className="flex items-center justify-end pt-2 border-t border-[#ef4444]/25">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        playPopSound();
+                        setMode('signup');
+                        setErrorMessage('');
+                        setEmailError('');
+                        setPasswordError('');
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-[#ef4444] hover:bg-[#dc2626] text-white font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
+                    >
+                      <span>Go to Sign Up Tab →</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Direct 1-Click Google Sign-In if Email/Password is not enabled in Firebase */}
+                {errorMessage.includes('Firebase Console me enabled nahi hai') && (
+                  <div className="flex items-center justify-end pt-2 border-t border-[#ef4444]/25">
+                    <button
+                      type="button"
+                      onClick={handleGoogleSignIn}
+                      className="px-3 py-1.5 rounded-lg bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>Continue with Google (1-Tap) →</span>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
