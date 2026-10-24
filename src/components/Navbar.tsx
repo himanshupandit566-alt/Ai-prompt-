@@ -36,10 +36,10 @@ export const Navbar: React.FC = () => {
           <Link to="/" className="flex items-center gap-2.5 shrink-0 group min-w-0">
             <AppLogo size={36} className="group-hover:scale-105 transition-transform shrink-0" />
             <div className="flex flex-col">
-              <span className="font-extrabold text-base sm:text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-purple-300 bg-clip-text text-transparent">
-                FX <span className="text-purple-400 font-bold">Prompty</span>
+              <span className="font-extrabold text-base sm:text-lg tracking-tight bg-gradient-to-r from-slate-900 via-slate-800 to-purple-600 dark:from-white dark:via-slate-200 dark:to-purple-300 bg-clip-text text-transparent">
+                FX <span className="text-purple-600 dark:text-purple-400 font-bold">Prompty</span>
               </span>
-              <span className="text-[10px] text-slate-400 tracking-wider font-medium hidden sm:block">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 tracking-wider font-medium hidden sm:block">
                 Discover. Copy. Create.
               </span>
             </div>
@@ -56,13 +56,13 @@ export const Navbar: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search portraits, cinematic photos, anime, luxury..."
-              className="w-full pl-10 pr-4 py-2 text-sm bg-dark-900 border border-slate-800 rounded-full text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500/80 focus:ring-1 focus:ring-purple-500/50 transition-all"
+              className="w-full pl-10 pr-4 py-2 text-sm bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-full text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500/80 focus:ring-1 focus:ring-purple-500/50 transition-all"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 text-slate-500 hover:text-slate-300"
+                className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -76,8 +76,8 @@ export const Navbar: React.FC = () => {
               onClick={() => playClickSound()}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive('/explore')
-                  ? 'bg-purple-600/15 text-purple-400'
-                  : 'text-slate-300 hover:text-white hover:bg-dark-850'
+                  ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850'
               }`}
             >
               <Compass className="w-4 h-4" /> Explore
@@ -88,8 +88,8 @@ export const Navbar: React.FC = () => {
               onClick={() => playClickSound()}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive('/category')
-                  ? 'bg-purple-600/15 text-purple-400'
-                  : 'text-slate-300 hover:text-white hover:bg-dark-850'
+                  ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850'
               }`}
             >
               <Grid className="w-4 h-4" /> Categories
@@ -100,8 +100,8 @@ export const Navbar: React.FC = () => {
               onClick={() => playClickSound()}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive('/admin')
-                  ? 'bg-purple-600/15 text-purple-400'
-                  : 'text-slate-300 hover:text-white hover:bg-dark-850'
+                  ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850'
               }`}
             >
               <PlusCircle className="w-4 h-4" /> Creator
@@ -115,18 +115,18 @@ export const Navbar: React.FC = () => {
               href="https://github.com/himanshupandit566-alt"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dark-900/90 hover:bg-purple-950/30 border border-purple-500/30 hover:border-purple-400 text-xs text-slate-300 hover:text-white transition-all shadow-[0_0_15px_rgba(139,92,246,0.18)] group shrink-0"
+              className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-dark-900/90 hover:bg-purple-500/10 dark:hover:bg-purple-950/30 border border-purple-500/30 hover:border-purple-400 text-xs text-slate-700 dark:text-slate-300 hover:text-purple-700 dark:hover:text-white transition-all shadow-sm group shrink-0"
               title="Created by Himanshu Pandey"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
-              <span className="text-slate-400">Created by</span>
-              <strong className="text-purple-300 font-semibold group-hover:underline">Himanshu Pandey</strong>
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+              <span className="text-slate-500 dark:text-slate-400">Created by</span>
+              <strong className="text-purple-700 dark:text-purple-300 font-semibold group-hover:underline">Himanshu Pandey</strong>
             </a>
 
             {/* Mobile Search Toggle Button */}
             <button
               onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-              className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-dark-850 md:hidden shrink-0"
+              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850 md:hidden shrink-0"
               aria-label="Search"
             >
               <Search className="w-5 h-5" />
@@ -138,8 +138,8 @@ export const Navbar: React.FC = () => {
               onClick={() => playPopSound()}
               className={`hidden sm:flex relative p-2 rounded-xl transition-all shrink-0 ${
                 isActive('/favorites')
-                  ? 'bg-rose-500/15 text-rose-400'
-                  : 'text-slate-300 hover:text-white hover:bg-dark-850'
+                  ? 'bg-rose-500/15 text-rose-500'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850'
               }`}
               aria-label="Favorites"
             >
@@ -157,8 +157,8 @@ export const Navbar: React.FC = () => {
               onClick={() => playClickSound()}
               className={`hidden sm:flex p-2 rounded-xl transition-all shrink-0 ${
                 isActive('/settings')
-                  ? 'bg-purple-600/15 text-purple-400'
-                  : 'text-slate-300 hover:text-white hover:bg-dark-850'
+                  ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850'
               }`}
               aria-label="Settings"
             >

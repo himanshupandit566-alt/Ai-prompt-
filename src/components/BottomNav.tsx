@@ -29,8 +29,8 @@ export const BottomNav: React.FC = () => {
               className={({ isActive }) =>
                 `flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all relative ${
                   isActive
-                    ? 'text-purple-400 font-semibold'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'text-purple-600 dark:text-purple-400 font-semibold'
+                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                 }`
               }
             >

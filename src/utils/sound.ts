@@ -3,6 +3,16 @@
 
 let audioCtx: AudioContext | null = null;
 
+export const isSoundEnabled = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem('fx_sound_pref') !== 'false';
+};
+
+export const setSoundEnabled = (enabled: boolean) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('fx_sound_pref', enabled ? 'true' : 'false');
+};
+
 const getAudioContext = (): AudioContext | null => {
   if (typeof window === 'undefined') return null;
   try {
@@ -26,6 +36,7 @@ const getAudioContext = (): AudioContext | null => {
  * Audible & tactile on phone and laptop speakers
  */
 export const playClickSound = (volume: number = 0.35) => {
+  if (!isSoundEnabled()) return;
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
@@ -59,6 +70,7 @@ export const playClickSound = (volume: number = 0.35) => {
  * Perfect for modal opens, favorite toggles, and tab switches
  */
 export const playPopSound = (volume: number = 0.38) => {
+  if (!isSoundEnabled()) return;
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
@@ -90,6 +102,7 @@ export const playPopSound = (volume: number = 0.38) => {
  * Vibrant high-tech chime sound for success actions (like prompt copy)
  */
 export const playSuccessChime = (volume: number = 0.32) => {
+  if (!isSoundEnabled()) return;
   try {
     const ctx = getAudioContext();
     if (!ctx) return;

@@ -4,31 +4,31 @@ import { AppLogo } from './AppLogo';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="w-full bg-dark-950 border-t border-slate-800/80 pt-12 pb-24 md:pb-12 mt-16 text-slate-400">
+    <footer className="w-full bg-white dark:bg-dark-950 border-t border-slate-200 dark:border-slate-800/80 pt-12 pb-24 md:pb-12 mt-16 text-slate-500 dark:text-slate-400 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand Info */}
           <div className="md:col-span-2 space-y-3">
             <Link to="/" className="flex items-center gap-2.5 group inline-flex">
               <AppLogo size={34} className="group-hover:scale-105 transition-transform" />
-              <span className="font-extrabold text-lg text-white tracking-tight">
-                FX <span className="text-purple-400">Prompty</span>
+              <span className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">
+                FX <span className="text-purple-600 dark:text-purple-400">Prompty</span>
               </span>
             </Link>
-            <p className="text-sm text-slate-400 max-w-sm leading-relaxed">
+            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
               Discover. Copy. Create. Premium curated AI image generation prompts for Midjourney, DALL-E 3, Flux.1, and Stable Diffusion XL.
             </p>
             <div className="flex flex-wrap gap-2 pt-2">
-              <span className="px-2.5 py-1 rounded-md bg-dark-900 border border-slate-800 text-[11px] text-slate-300">
+              <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-700 dark:text-slate-300">
                 Midjourney v6
               </span>
-              <span className="px-2.5 py-1 rounded-md bg-dark-900 border border-slate-800 text-[11px] text-slate-300">
+              <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-700 dark:text-slate-300">
                 DALL-E 3
               </span>
-              <span className="px-2.5 py-1 rounded-md bg-dark-900 border border-slate-800 text-[11px] text-slate-300">
+              <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-700 dark:text-slate-300">
                 Flux.1
               </span>
-              <span className="px-2.5 py-1 rounded-md bg-dark-900 border border-slate-800 text-[11px] text-slate-300">
+              <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-700 dark:text-slate-300">
                 SDXL
               </span>
             </div>
@@ -36,41 +36,41 @@ export const Footer: React.FC = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-sm font-semibold text-white mb-3 tracking-wider uppercase">
+            <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-3 tracking-wider uppercase">
               Navigation
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/" className="hover:text-purple-400 transition-colors">Home</Link>
+                <Link to="/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Home</Link>
               </li>
               <li>
-                <Link to="/explore" className="hover:text-purple-400 transition-colors">Explore Gallery</Link>
+                <Link to="/explore" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Explore Gallery</Link>
               </li>
               <li>
-                <Link to="/category/all" className="hover:text-purple-400 transition-colors">Browse Categories</Link>
+                <Link to="/category/all" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Browse Categories</Link>
               </li>
               <li>
-                <Link to="/favorites" className="hover:text-purple-400 transition-colors">My Favorites</Link>
+                <Link to="/favorites" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">My Favorites</Link>
               </li>
               <li>
-                <Link to="/admin" className="hover:text-purple-400 transition-colors">Prompt Creator</Link>
+                <Link to="/admin" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Prompt Creator</Link>
               </li>
             </ul>
           </div>
 
           {/* App Info & Offline */}
           <div>
-            <h4 className="text-sm font-semibold text-white mb-3 tracking-wider uppercase">
+            <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-3 tracking-wider uppercase">
               Application
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/settings" className="hover:text-purple-400 transition-colors">Settings & Cache</Link>
+                <Link to="/settings" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Settings & Cache</Link>
               </li>
-              <li className="text-xs text-slate-400 pt-1">
+              <li className="text-xs text-slate-500 dark:text-slate-400 pt-1">
                 PWA Ready • Offline Prompt Storage • Instant Copy
               </li>
-              <li className="text-xs text-slate-400">
+              <li className="text-xs text-slate-500 dark:text-slate-400">
                 Sample illustrative visual assets provided for prompt styling.
               </li>
             </ul>
@@ -78,7 +78,7 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom copyright and disclaimer */}
-        <div className="pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+        <div className="pt-6 border-t border-slate-200 dark:border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
           <p>© {new Date().getFullYear()} FX Prompty. All rights reserved.</p>
           <div className="flex items-center gap-1.5 flex-wrap">
             <span>Created by</span>
@@ -86,11 +86,11 @@ export const Footer: React.FC = () => {
               href="https://github.com/himanshupandit566-alt"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-purple-400 hover:text-purple-300 font-semibold underline underline-offset-2 transition-colors"
+              className="text-purple-600 dark:text-purple-400 font-semibold underline underline-offset-2 transition-colors"
             >
               Himanshu Pandey
             </a>
-            <span className="text-slate-600">•</span>
+            <span className="text-slate-400 dark:text-slate-600">•</span>
             <span>for the creative AI community.</span>
           </div>
         </div>
