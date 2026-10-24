@@ -31,14 +31,14 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
       {/* Section Header */}
       <div className="flex items-center justify-between mb-4 px-4 sm:px-0">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400">
+          <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500 dark:text-amber-400">
             <Flame className="w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
               Trending Prompts
             </h2>
-            <p className="text-xs text-slate-400 hidden sm:block">
+            <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
               Most saved community visual concepts this week
             </p>
           </div>
@@ -49,14 +49,14 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
           <button
             onClick={() => scroll('left')}
             aria-label="Scroll trending left"
-            className="w-8 h-8 rounded-full bg-dark-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-dark-800 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-800 transition-colors cursor-pointer shadow-sm dark:shadow-none"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => scroll('right')}
             aria-label="Scroll trending right"
-            className="w-8 h-8 rounded-full bg-dark-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-dark-800 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-800 transition-colors cursor-pointer shadow-sm dark:shadow-none"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -74,12 +74,12 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
           return (
             <div
               key={prompt.id}
-              className="group shrink-0 w-64 sm:w-72 bg-dark-900 rounded-2xl border border-slate-800/80 hover:border-purple-500/40 overflow-hidden flex flex-col justify-between shadow-lg hover:shadow-glow-purple transition-all duration-300"
+              className="group shrink-0 w-64 sm:w-72 bg-white dark:bg-dark-900 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-purple-500/40 overflow-hidden flex flex-col justify-between shadow-sm dark:shadow-lg hover:shadow-glow-purple transition-all duration-300"
             >
               <Link
                 to={`/prompt/${prompt.id}`}
                 onClick={() => playClickSound()}
-                className="block relative aspect-[4/5] overflow-hidden bg-dark-950"
+                className="block relative aspect-[4/5] overflow-hidden bg-slate-100 dark:bg-dark-950"
               >
                 <img
                   src={prompt.thumbnailUrl}
@@ -87,7 +87,7 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
                   loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-dark-950/80 via-transparent to-black/30" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
 
                 {/* Popularity Indicator */}
                 <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-semibold text-amber-400 flex items-center gap-1">
@@ -107,7 +107,7 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
                   className={`absolute top-2.5 right-2.5 p-2 rounded-full backdrop-blur-md transition-all cursor-pointer ${
                     favorited
                       ? 'bg-rose-500 text-white'
-                      : 'bg-black/60 text-slate-300 hover:text-white border border-white/10'
+                      : 'bg-black/60 text-white hover:bg-black/80 border border-white/15'
                   }`}
                 >
                   <Heart className={`w-3.5 h-3.5 ${favorited ? 'fill-current' : ''}`} />
@@ -125,14 +125,14 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
               </Link>
 
               {/* Quick Action Footer: Clean View Details Link (Zero prompt text leakage) */}
-              <div className="p-3 bg-dark-900 flex items-center justify-between border-t border-slate-800/60">
-                <span className="text-[11px] text-slate-400 font-medium px-2 py-0.5 rounded-md bg-dark-950 border border-slate-800">
+              <div className="p-3 bg-white dark:bg-dark-900 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/60">
+                <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-dark-950 border border-slate-200 dark:border-slate-800">
                   {prompt.aspectRatio}
                 </span>
                 <Link
                   to={`/prompt/${prompt.id}`}
                   onClick={() => playClickSound()}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/30 text-purple-300 hover:text-white text-xs font-semibold transition-all group/btn"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-600/15 hover:bg-purple-100 dark:hover:bg-purple-600/25 border border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-300 hover:text-purple-900 dark:hover:text-white text-xs font-semibold transition-all group/btn"
                 >
                   <span>View Details</span>
                   <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />

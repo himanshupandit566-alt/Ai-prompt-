@@ -89,28 +89,28 @@ export const AdminPage: React.FC = () => {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-2 text-purple-400 mb-1">
+          <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-1">
             <PlusCircle className="w-5 h-5" />
             <span className="text-xs font-bold tracking-wider uppercase">Content Studio</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Create New Prompt
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
             Publish custom prompts into your local library with image previews and instant export support.
           </p>
         </div>
 
         <Link
           to="/explore"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-dark-900 border border-slate-800 text-xs text-slate-300 hover:text-white"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back
         </Link>
       </div>
 
       {errorMsg && (
-        <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm flex items-center gap-2">
+        <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-300 text-sm flex items-center gap-2">
           <AlertCircle className="w-5 h-5 shrink-0" />
           <span>{errorMsg}</span>
         </div>
@@ -118,10 +118,10 @@ export const AdminPage: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Form Column */}
-        <form onSubmit={handlePublish} className="lg:col-span-7 space-y-5 bg-dark-900 border border-slate-800 rounded-2xl p-6">
+        <form onSubmit={handlePublish} className="lg:col-span-7 space-y-5 bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
           {/* Title */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
               Title *
             </label>
             <input
@@ -130,13 +130,13 @@ export const AdminPage: React.FC = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Cyberpunk Samurai in Monsoon"
-              className="w-full px-4 py-2.5 bg-dark-950 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              className="w-full px-4 py-2.5 bg-[#f1f5f9] dark:bg-dark-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
               Style Description
             </label>
             <input
@@ -144,20 +144,20 @@ export const AdminPage: React.FC = () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="e.g. Gritty neon-lit street warrior with glowing katana"
-              className="w-full px-4 py-2.5 bg-dark-950 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              className="w-full px-4 py-2.5 bg-[#f1f5f9] dark:bg-dark-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500"
             />
           </div>
 
           {/* Category & Aspect Ratio */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as CategoryName)}
-                className="w-full px-3 py-2.5 bg-dark-950 border border-slate-800 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-purple-500 cursor-pointer"
+                className="w-full px-3 py-2.5 bg-[#f1f5f9] dark:bg-dark-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-purple-500 cursor-pointer"
               >
                 {CATEGORIES.filter((c) => c.name !== 'All').map((cat) => (
                   <option key={cat.name} value={cat.name}>
@@ -168,13 +168,13 @@ export const AdminPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                 Aspect Ratio
               </label>
               <select
                 value={aspectRatio}
                 onChange={(e) => setAspectRatio(e.target.value as AspectRatio)}
-                className="w-full px-3 py-2.5 bg-dark-950 border border-slate-800 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-purple-500 cursor-pointer"
+                className="w-full px-3 py-2.5 bg-[#f1f5f9] dark:bg-dark-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-purple-500 cursor-pointer"
               >
                 {aspectRatios.map((ratio) => (
                   <option key={ratio} value={ratio}>
@@ -187,7 +187,7 @@ export const AdminPage: React.FC = () => {
 
           {/* Image URL */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
               Image URL (Unsplash or Direct Link)
             </label>
             <input
@@ -195,7 +195,7 @@ export const AdminPage: React.FC = () => {
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="https://images.unsplash.com/photo-..."
-              className="w-full px-4 py-2.5 bg-dark-950 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              className="w-full px-4 py-2.5 bg-[#f1f5f9] dark:bg-dark-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500"
             />
             <span className="text-[11px] text-slate-500 mt-1 block">
               Leave blank to use an abstract generative cover.
@@ -204,7 +204,7 @@ export const AdminPage: React.FC = () => {
 
           {/* Full Prompt */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
               Complete Image Generation Prompt *
             </label>
             <textarea
@@ -213,13 +213,13 @@ export const AdminPage: React.FC = () => {
               value={promptText}
               onChange={(e) => setPromptText(e.target.value)}
               placeholder="Enter the detailed AI prompt here including camera specs, lighting, mood, etc..."
-              className="w-full px-4 py-3 bg-dark-950 border border-slate-800 rounded-xl text-sm font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              className="w-full px-4 py-3 bg-[#f1f5f9] dark:bg-dark-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500"
             />
           </div>
 
           {/* Negative Prompt */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
               Negative Prompt (Optional)
             </label>
             <textarea
@@ -227,13 +227,13 @@ export const AdminPage: React.FC = () => {
               value={negativePrompt}
               onChange={(e) => setNegativePrompt(e.target.value)}
               placeholder="e.g. blurry, low quality, deformed hands, cartoonish..."
-              className="w-full px-4 py-2.5 bg-dark-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              className="w-full px-4 py-2.5 bg-[#f1f5f9] dark:bg-dark-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500"
             />
           </div>
 
           {/* Tags */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
               Tags (Comma separated)
             </label>
             <input
@@ -241,13 +241,13 @@ export const AdminPage: React.FC = () => {
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
               placeholder="portrait, cinematic, moody, 8k"
-              className="w-full px-4 py-2 bg-dark-950 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              className="w-full px-4 py-2 bg-[#f1f5f9] dark:bg-dark-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-purple-500"
             />
           </div>
 
           {/* Compatible AI Tools */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
               Compatible Tools
             </label>
             <div className="flex flex-wrap gap-2">
@@ -258,10 +258,10 @@ export const AdminPage: React.FC = () => {
                     key={tool}
                     type="button"
                     onClick={() => toggleTool(tool)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-purple-600 text-white shadow-sm'
-                        : 'bg-dark-950 border border-slate-800 text-slate-400 hover:text-white'
+                        : 'bg-[#f1f5f9] dark:bg-dark-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     {isSelected && '✓ '} {tool}
@@ -280,7 +280,7 @@ export const AdminPage: React.FC = () => {
               onChange={(e) => setFeatured(e.target.checked)}
               className="w-4 h-4 rounded accent-purple-600"
             />
-            <label htmlFor="featured" className="text-sm font-medium text-slate-300 cursor-pointer">
+            <label htmlFor="featured" className="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
               Mark as Featured Prompt
             </label>
           </div>
@@ -289,14 +289,14 @@ export const AdminPage: React.FC = () => {
           <div className="pt-4 flex items-center gap-3">
             <button
               type="submit"
-              className="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm shadow-glow-purple transition-all active:scale-95 flex items-center justify-center gap-2"
+              className="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm shadow-glow-purple transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               <Sparkles className="w-4 h-4" /> Publish to Library
             </button>
             <button
               type="button"
               onClick={() => setPreviewMode(!previewMode)}
-              className="py-3 px-4 rounded-xl bg-dark-950 border border-slate-700 text-slate-300 hover:text-white text-sm font-semibold transition-colors flex items-center gap-1.5"
+              className="py-3 px-4 rounded-xl bg-[#f1f5f9] dark:bg-dark-950 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-sm font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <Eye className="w-4 h-4" /> Preview
             </button>
@@ -305,16 +305,16 @@ export const AdminPage: React.FC = () => {
 
         {/* Live Preview Column */}
         <div className="lg:col-span-5 space-y-4">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Eye className="w-4 h-4 text-purple-400" /> Live Card Preview
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+            <Eye className="w-4 h-4 text-purple-600 dark:text-purple-400" /> Live Card Preview
           </span>
 
-          <div className="bg-dark-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-            <div className="aspect-[4/5] bg-dark-950 relative overflow-hidden flex items-center justify-center">
+          <div className="bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl">
+            <div className="aspect-[4/5] bg-slate-100 dark:bg-dark-950 relative overflow-hidden flex items-center justify-center">
               {imageUrl ? (
                 <img src={imageUrl} alt="preview" className="w-full h-full object-cover" />
               ) : (
-                <div className="text-center p-6 text-slate-600">
+                <div className="text-center p-6 text-slate-400 dark:text-slate-600">
                   <Sparkles className="w-12 h-12 mx-auto mb-2 opacity-50" />
                   <span className="text-xs">Image Preview</span>
                 </div>
@@ -330,11 +330,11 @@ export const AdminPage: React.FC = () => {
             </div>
 
             <div className="p-4 space-y-2">
-              <span className="text-xs font-semibold text-purple-400">{category}</span>
-              <h3 className="text-base font-bold text-white line-clamp-1">
+              <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">{category}</span>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white line-clamp-1">
                 {title || 'Untitled Prompt'}
               </h3>
-              <p className="text-xs text-slate-400 font-mono line-clamp-3 bg-dark-950 p-2.5 rounded-lg border border-slate-800/80">
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-mono line-clamp-3 bg-slate-50 dark:bg-dark-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800/80">
                 {promptText || 'Your prompt text will preview here...'}
               </p>
             </div>

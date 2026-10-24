@@ -8,6 +8,16 @@ export default {
   theme: {
     extend: {
       colors: {
+        theme: {
+          bg: 'var(--bg-main)',
+          card: 'var(--bg-card)',
+          cardSecondary: 'var(--bg-card-secondary)',
+          border: 'var(--border-color)',
+          text: 'var(--text-primary)',
+          textSecondary: 'var(--text-secondary)',
+          textMuted: 'var(--text-muted)',
+          input: 'var(--input-bg)',
+        },
         dark: {
           950: '#07080B', // deepest background
           900: '#0D0F17', // card / surface background

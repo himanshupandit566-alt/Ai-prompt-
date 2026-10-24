@@ -82,7 +82,7 @@ const AppContent: React.FC = () => {
   const isImmersiveScreen = pathname === '/welcome' || pathname === '/login';
 
   return (
-    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col font-sans selection:bg-purple-600/30 selection:text-white transition-colors duration-200">
+    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] flex flex-col font-sans selection:bg-purple-600/30 selection:text-white transition-colors duration-200">
       <OnboardingGateway />
 
       {/* Top Navbar with Glassmorphism (hidden on full-screen welcome/login screens) */}

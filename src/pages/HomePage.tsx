@@ -101,12 +101,12 @@ export const HomePage: React.FC = () => {
         <div className="mt-10 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-purple-400" />
-              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
                 {selectedCategory === 'All' ? 'Explore All Prompts' : selectedCategory}
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
               {searchQuery
                 ? `Showing search results for "${searchQuery}"`
                 : 'Browse high-quality prompts curated for your next creative generation'}
@@ -140,17 +140,17 @@ export const HomePage: React.FC = () => {
           </div>
         ) : (
           /* Empty State */
-          <div className="py-20 text-center bg-dark-900/50 rounded-3xl border border-slate-800/80 p-8 my-8 max-w-lg mx-auto">
-            <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 mx-auto flex items-center justify-center mb-4">
+          <div className="py-20 text-center bg-white dark:bg-dark-900/50 rounded-3xl border border-slate-200 dark:border-slate-800/80 p-8 my-8 max-w-lg mx-auto shadow-sm dark:shadow-none">
+            <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 mx-auto flex items-center justify-center mb-4">
               <AlertCircle className="w-7 h-7" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">No matching prompts found</h3>
-            <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No matching prompts found</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
               We couldn't find any prompts matching your active filters or search terms. Try searching for something else or reset your filters.
             </p>
             <button
               onClick={handleResetFilters}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold transition-all shadow-glow-purple"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold transition-all shadow-glow-purple cursor-pointer"
             >
               <Compass className="w-4 h-4" /> Reset Filters
             </button>

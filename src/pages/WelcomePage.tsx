@@ -34,25 +34,25 @@ export const WelcomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#07080B] text-slate-100 flex flex-col justify-between relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] flex flex-col justify-between relative overflow-hidden font-sans transition-colors">
       {/* Background Ambient Glow Orbs */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-purple-600/20 rounded-full blur-[130px] pointer-events-none" />
-      <div className="absolute top-1/3 -right-32 w-96 h-96 bg-blue-600/15 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-indigo-600/20 rounded-full blur-[130px] pointer-events-none" />
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-purple-600/15 dark:bg-purple-600/20 rounded-full blur-[130px] pointer-events-none" />
+      <div className="absolute top-1/3 -right-32 w-96 h-96 bg-blue-600/10 dark:bg-blue-600/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-indigo-600/15 dark:bg-indigo-600/20 rounded-full blur-[130px] pointer-events-none" />
 
       {/* Top Header / Skip Link */}
       <header className="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5 group">
           <AppLogo size={38} className="group-hover:scale-105 transition-transform" />
-          <span className="font-extrabold text-base tracking-tight text-white">
-            FX <span className="text-purple-400">Prompty</span>
+          <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white">
+            FX <span className="text-purple-600 dark:text-purple-400">Prompty</span>
           </span>
         </Link>
 
         {/* Top 'Skip for now' button */}
         <button
           onClick={handleSkip}
-          className="text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+          className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
         >
           Skip for now →
         </button>
@@ -64,17 +64,17 @@ export const WelcomePage: React.FC = () => {
         <div className="relative mb-8 w-full flex items-center justify-center">
           {/* Central Modern Vector Emblem with Neon Glow */}
           <div className="relative flex items-center justify-center group animate-pulse-subtle">
-            <div className="absolute -inset-4 bg-purple-600/25 rounded-3xl blur-2xl group-hover:bg-purple-600/40 transition-all duration-700 pointer-events-none" />
+            <div className="absolute -inset-4 bg-purple-600/20 dark:bg-purple-600/25 rounded-3xl blur-2xl group-hover:bg-purple-600/35 transition-all duration-700 pointer-events-none" />
             <AppLogo
               size={120}
               showGlow={true}
-              className="relative z-10 drop-shadow-[0_0_35px_rgba(168,85,247,0.6)]"
+              className="relative z-10 drop-shadow-[0_0_35px_rgba(168,85,247,0.5)]"
             />
           </div>
 
           {/* Floating Pill Preview 1: Left */}
-          <div className="absolute -left-2 sm:left-4 top-4 bg-[#12141D]/90 border border-purple-500/30 backdrop-blur-md rounded-2xl p-2.5 shadow-xl flex items-center gap-2.5 animate-in fade-in slide-in-from-left-4 duration-700">
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-dark-950">
+          <div className="absolute -left-2 sm:left-4 top-4 bg-white/95 dark:bg-[#12141D]/90 border border-slate-200 dark:border-purple-500/30 backdrop-blur-md rounded-2xl p-2.5 shadow-xl flex items-center gap-2.5 animate-in fade-in slide-in-from-left-4 duration-700">
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-200 dark:bg-dark-950">
               <img
                 src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=150&q=80"
                 alt="Cyberpunk"
@@ -82,14 +82,14 @@ export const WelcomePage: React.FC = () => {
               />
             </div>
             <div className="text-left pr-1">
-              <p className="text-[11px] font-semibold text-white">Cyberpunk</p>
-              <p className="text-[9px] text-purple-300 font-mono">Arri 85mm</p>
+              <p className="text-[11px] font-semibold text-slate-900 dark:text-white">Cyberpunk</p>
+              <p className="text-[9px] text-purple-600 dark:text-purple-300 font-mono">Arri 85mm</p>
             </div>
           </div>
 
           {/* Floating Pill Preview 2: Right */}
-          <div className="absolute -right-2 sm:right-4 bottom-2 bg-[#12141D]/90 border border-blue-500/30 backdrop-blur-md rounded-2xl p-2.5 shadow-xl flex items-center gap-2.5 animate-in fade-in slide-in-from-right-4 duration-700">
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-dark-950">
+          <div className="absolute -right-2 sm:right-4 bottom-2 bg-white/95 dark:bg-[#12141D]/90 border border-slate-200 dark:border-blue-500/30 backdrop-blur-md rounded-2xl p-2.5 shadow-xl flex items-center gap-2.5 animate-in fade-in slide-in-from-right-4 duration-700">
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-200 dark:bg-dark-950">
               <img
                 src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
                 alt="Cinematic"
@@ -97,42 +97,42 @@ export const WelcomePage: React.FC = () => {
               />
             </div>
             <div className="text-left pr-1">
-              <p className="text-[11px] font-semibold text-white">Cinematic</p>
-              <p className="text-[9px] text-blue-300 font-mono">1-Tap Copy</p>
+              <p className="text-[11px] font-semibold text-slate-900 dark:text-white">Cinematic</p>
+              <p className="text-[9px] text-blue-600 dark:text-blue-300 font-mono">1-Tap Copy</p>
             </div>
           </div>
         </div>
 
         {/* Neon Branding Glowing Text */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold mb-3">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-100 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-semibold mb-3">
           <Sparkles className="w-3.5 h-3.5" />
           <span>Curated AI Prompts Hub</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4 leading-tight">
           Welcome to <br />
-          <span className="bg-gradient-to-r from-purple-400 via-indigo-300 to-blue-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(168,85,247,0.4)]">
+          <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 dark:from-purple-400 dark:via-indigo-300 dark:to-blue-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(168,85,247,0.3)]">
             FX Prompty
           </span>
         </h1>
 
         {/* Subtitle */}
-        <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-md mx-auto mb-8 font-normal">
+        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-md mx-auto mb-8 font-normal">
           Discover, explore, and copy thousands of curated AI prompts for Midjourney, Flux, and DALL-E.
         </p>
 
         {/* 3 Specific Feature Highlights Badges */}
         <div className="flex flex-wrap items-center justify-center gap-2.5 mb-10 max-w-md">
-          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#131622] border border-purple-500/30 text-xs font-medium text-slate-200 shadow-sm">
-            <Zap className="w-4 h-4 text-purple-400 shrink-0" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white dark:bg-[#131622] border border-slate-200 dark:border-purple-500/30 text-xs font-medium text-slate-800 dark:text-slate-200 shadow-sm">
+            <Zap className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
             <span>1-Tap Copy</span>
           </div>
-          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#131622] border border-indigo-500/30 text-xs font-medium text-slate-200 shadow-sm">
-            <Flame className="w-4 h-4 text-amber-400 shrink-0" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white dark:bg-[#131622] border border-slate-200 dark:border-indigo-500/30 text-xs font-medium text-slate-800 dark:text-slate-200 shadow-sm">
+            <Flame className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0" />
             <span>Daily Trending Prompts</span>
           </div>
-          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#131622] border border-blue-500/30 text-xs font-medium text-slate-200 shadow-sm">
-            <Wand2 className="w-4 h-4 text-blue-400 shrink-0" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white dark:bg-[#131622] border border-slate-200 dark:border-blue-500/30 text-xs font-medium text-slate-800 dark:text-slate-200 shadow-sm">
+            <Wand2 className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
             <span>Flux &amp; Midjourney Ready</span>
           </div>
         </div>
@@ -142,7 +142,7 @@ export const WelcomePage: React.FC = () => {
           {/* Glowing Gradient Get Started Button */}
           <button
             onClick={handleGetStarted}
-            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-base shadow-[0_0_35px_-5px_rgba(139,92,246,0.7)] hover:shadow-[0_0_45px_-5px_rgba(139,92,246,0.9)] transition-all active:scale-98 flex items-center justify-center gap-2.5 group cursor-pointer"
+            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-base shadow-[0_0_35px_-5px_rgba(139,92,246,0.6)] hover:shadow-[0_0_45px_-5px_rgba(139,92,246,0.8)] transition-all active:scale-98 flex items-center justify-center gap-2.5 group cursor-pointer"
           >
             <span>Get Started</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -151,9 +151,9 @@ export const WelcomePage: React.FC = () => {
           {/* Bottom 'Explore as Guest (Skip for now)' Button */}
           <button
             onClick={handleSkip}
-            className="w-full py-3 px-4 rounded-xl text-slate-400 hover:text-white text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full py-3 px-4 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <Compass className="w-4 h-4 text-purple-400" />
+            <Compass className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             <span>Explore as Guest (Skip for now)</span>
           </button>
         </div>

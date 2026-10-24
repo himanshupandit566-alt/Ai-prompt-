@@ -205,7 +205,7 @@ export const Navbar: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search prompts, styles, tags..."
-              className="w-full pl-9 pr-9 py-2 text-sm bg-dark-900 border border-purple-500/50 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none"
+              className="w-full pl-9 pr-9 py-2 text-sm bg-[#f1f5f9] dark:bg-dark-900 border border-purple-500/50 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none"
             />
             {searchQuery && (
               <button

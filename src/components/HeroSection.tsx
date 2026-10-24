@@ -38,21 +38,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSearch, initialQuery
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         {/* Pill Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-semibold mb-4 backdrop-blur-md">
-          <Sparkles className="w-3.5 h-3.5 text-purple-400 animate-pulse-subtle" />
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-700 dark:text-purple-300 text-xs font-semibold mb-4 backdrop-blur-md">
+          <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 animate-pulse-subtle" />
           <span>FX Prompty • Curated AI Prompts for Midjourney, DALL-E 3 & Flux</span>
         </div>
 
         {/* Heading */}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-4 leading-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4 leading-tight">
           Find Your Next <br className="hidden sm:inline" />
-          <span className="bg-gradient-to-r from-purple-400 via-indigo-300 to-blue-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 dark:from-purple-400 dark:via-indigo-300 dark:to-blue-400 bg-clip-text text-transparent">
             AI Masterpiece
           </span>
         </h1>
 
         {/* Subtitle */}
-        <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto mb-8 font-normal leading-relaxed">
+        <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-8 font-normal leading-relaxed">
           Explore stunning AI image prompts on FX Prompty and recreate your favorite visual styles with one-tap copy.
         </p>
 
@@ -65,7 +65,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSearch, initialQuery
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search portraits, cinematic photos, anime, luxury..."
-              className="w-full pl-12 pr-32 py-3.5 md:py-4 bg-dark-900/90 border border-slate-700/80 rounded-2xl text-slate-100 placeholder-slate-400 text-sm md:text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 shadow-2xl transition-all"
+              className="w-full pl-12 pr-32 py-3.5 md:py-4 bg-[#f1f5f9] dark:bg-dark-900/90 border border-[#e2e8f0] dark:border-slate-700/80 rounded-2xl text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder-slate-400 text-sm md:text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 shadow-sm dark:shadow-2xl transition-all"
             />
             <button
               type="submit"
@@ -81,21 +81,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSearch, initialQuery
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <button
             onClick={() => navigate('/explore')}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-dark-850 hover:bg-dark-800 border border-slate-700 text-slate-200 hover:text-white text-sm font-semibold transition-all shadow-sm active:scale-95"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-dark-850 hover:bg-slate-50 dark:hover:bg-dark-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white text-sm font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
           >
-            <Wand2 className="w-4 h-4 text-purple-400" />
+            <Wand2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             <span>Explore Prompts</span>
           </button>
 
           {/* Quick Filter Tag Chips */}
-          <div className="flex items-center gap-1.5 overflow-x-auto max-w-full py-1 text-xs text-slate-400 scrollbar-none">
+          <div className="flex items-center gap-1.5 overflow-x-auto max-w-full py-1 text-xs text-slate-500 scrollbar-none">
             <span className="shrink-0 text-slate-500 hidden md:inline">Trending:</span>
             {quickTags.map((tag) => (
               <button
                 key={tag}
                 type="button"
                 onClick={() => handleQuickTagClick(tag)}
-                className="shrink-0 px-2.5 py-1 rounded-lg bg-dark-900 border border-slate-800 hover:border-purple-500/40 hover:text-purple-300 text-slate-400 text-[11px] transition-colors"
+                className="shrink-0 px-2.5 py-1 rounded-lg bg-[#f1f5f9] dark:bg-dark-900 border border-[#e2e8f0] dark:border-slate-800 hover:border-purple-500/40 hover:text-purple-600 dark:hover:text-purple-300 text-[#334155] dark:text-slate-400 text-[11px] transition-colors cursor-pointer"
               >
                 {tag}
               </button>

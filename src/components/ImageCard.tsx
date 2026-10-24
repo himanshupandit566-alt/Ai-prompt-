@@ -49,26 +49,26 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
   };
 
   return (
-    <div className="group relative rounded-2xl overflow-hidden glass-card glass-card-hover flex flex-col cursor-pointer">
+    <div className="group relative rounded-2xl overflow-hidden glass-card glass-card-hover flex flex-col cursor-pointer transition-all">
       <Link
         to={`/prompt/${prompt.id}`}
         onClick={handleCardClick}
         className="block relative w-full overflow-hidden"
       >
-        <div className={`w-full overflow-hidden relative bg-dark-950 ${getAspectRatioClass(prompt.aspectRatio)}`}>
+        <div className={`w-full overflow-hidden relative bg-slate-100 dark:bg-dark-950 ${getAspectRatioClass(prompt.aspectRatio)}`}>
           {/* Skeleton placeholder while image loads */}
           {!imageLoaded && !imageError && (
-            <div className="absolute inset-0 bg-dark-850 animate-pulse flex items-center justify-center">
+            <div className="absolute inset-0 bg-slate-200 dark:bg-dark-850 animate-pulse flex items-center justify-center">
               <div className="w-8 h-8 rounded-full border-2 border-purple-500/30 border-t-purple-500 animate-spin" />
             </div>
           )}
 
           {/* Graceful Fallback if image fails to load */}
           {imageError ? (
-            <div className="absolute inset-0 bg-dark-850 flex flex-col items-center justify-center p-4 text-center">
-              <ImageIcon className="w-10 h-10 text-slate-600 mb-2" />
-              <p className="text-xs text-slate-400 font-medium line-clamp-2">{prompt.title}</p>
-              <span className="text-[10px] text-purple-400 mt-1 uppercase tracking-wider">{prompt.category}</span>
+            <div className="absolute inset-0 bg-slate-100 dark:bg-dark-850 flex flex-col items-center justify-center p-4 text-center">
+              <ImageIcon className="w-10 h-10 text-slate-400 dark:text-slate-600 mb-2" />
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium line-clamp-2">{prompt.title}</p>
+              <span className="text-[10px] text-purple-600 dark:text-purple-400 mt-1 uppercase tracking-wider">{prompt.category}</span>
             </div>
           ) : (
             <img
@@ -84,17 +84,17 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
           )}
 
           {/* Overlay Gradient on Hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-dark-950/90 via-dark-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
           {/* Top Badges */}
           <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
             <div className="flex items-center gap-1.5 flex-wrap">
               {prompt.featured && (
-                <span className="pointer-events-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-500/90 text-white backdrop-blur-md shadow-sm">
+                <span className="pointer-events-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-600 text-white backdrop-blur-md shadow-sm">
                   <Sparkles className="w-2.5 h-2.5" /> Featured
                 </span>
               )}
-              <span className="pointer-events-auto px-2 py-0.5 rounded-full text-[10px] font-medium bg-dark-900/80 text-slate-300 backdrop-blur-md border border-white/10">
+              <span className="pointer-events-auto px-2 py-0.5 rounded-full text-[10px] font-medium bg-black/60 dark:bg-dark-900/80 text-white dark:text-slate-300 backdrop-blur-md border border-white/15">
                 {prompt.aspectRatio}
               </span>
             </div>
@@ -106,7 +106,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
               className={`pointer-events-auto p-2 rounded-full backdrop-blur-md transition-all duration-200 transform active:scale-90 cursor-pointer ${
                 favorited
                   ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30'
-                  : 'bg-dark-900/70 text-slate-300 hover:text-white hover:bg-dark-900 border border-white/10'
+                  : 'bg-black/50 dark:bg-dark-900/70 text-white dark:text-slate-300 hover:text-white hover:bg-black/70 dark:hover:bg-dark-900 border border-white/20 dark:border-white/10'
               }`}
             >
               <Heart className={`w-4 h-4 ${favorited ? 'fill-current' : ''}`} />
@@ -115,7 +115,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
 
           {/* Hover Hint: Click to view prompt */}
           <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 pointer-events-none flex items-center justify-between text-xs text-white">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-dark-900/80 backdrop-blur-md border border-white/10 text-[11px] font-medium">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/70 backdrop-blur-md border border-white/15 text-[11px] font-medium">
               <Eye className="w-3.5 h-3.5 text-purple-400" />
               <span>View Prompt</span>
             </span>
@@ -126,28 +126,28 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
       {/* Card Details: Photo, Title, Category and Views (Protected - Prompt text hidden on feed) */}
       <div className="p-3.5 flex flex-col flex-grow justify-between gap-1.5">
         <div>
-          <div className="flex items-center justify-between text-[11px] font-medium text-purple-400 mb-1">
+          <div className="flex items-center justify-between text-[11px] font-medium text-purple-600 dark:text-purple-400 mb-1">
             <span className="truncate">{prompt.category}</span>
             {prompt.popularity > 0 && (
-              <span className="text-slate-400 text-[10px] shrink-0 font-normal flex items-center gap-1">
-                <Eye className="w-3 h-3 text-slate-500" />
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] shrink-0 font-normal flex items-center gap-1">
+                <Eye className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                 <span>{(prompt.popularity / 1000).toFixed(1)}k views</span>
               </span>
             )}
           </div>
           <Link to={`/prompt/${prompt.id}`} onClick={handleCardClick}>
-            <h3 className="text-sm font-semibold text-slate-100 group-hover:text-purple-300 transition-colors line-clamp-1">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors line-clamp-1">
               {prompt.title}
             </h3>
           </Link>
         </div>
 
         {/* Card Footer: Clean View Details Button (Zero prompt text leakage) */}
-        <div className="pt-2.5 border-t border-slate-800/60">
+        <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800/60">
           <Link
             to={`/prompt/${prompt.id}`}
             onClick={handleCardClick}
-            className="w-full py-2 px-3 rounded-xl bg-purple-600/10 hover:bg-purple-600/20 border border-purple-500/25 hover:border-purple-500/40 text-purple-300 hover:text-white font-semibold text-xs inline-flex items-center justify-center gap-1.5 transition-all group/btn"
+            className="w-full py-2 px-3 rounded-xl bg-purple-50 dark:bg-purple-600/10 hover:bg-purple-100 dark:hover:bg-purple-600/20 border border-purple-200 dark:border-purple-500/25 hover:border-purple-300 dark:hover:border-purple-500/40 text-purple-700 dark:text-purple-300 hover:text-purple-900 dark:hover:text-white font-semibold text-xs inline-flex items-center justify-center gap-1.5 transition-all group/btn"
           >
             <span>View Details</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />

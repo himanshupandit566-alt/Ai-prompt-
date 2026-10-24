@@ -87,14 +87,14 @@ export const ExplorePage: React.FC = () => {
     <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Page Header */}
       <div className="mb-6">
-        <div className="flex items-center gap-2.5 text-purple-400 mb-2">
+        <div className="flex items-center gap-2.5 text-purple-600 dark:text-purple-400 mb-2">
           <Compass className="w-5 h-5" />
           <span className="text-xs font-bold tracking-wider uppercase">Visual Discovery</span>
         </div>
-        <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
           Explore Prompt Gallery
         </h1>
-        <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
+        <p className="text-sm text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
           Search thousands of keywords, cinematic camera styles, lighting setups, and visual aesthetics.
         </p>
       </div>
@@ -107,12 +107,12 @@ export const ExplorePage: React.FC = () => {
           value={searchQuery}
           onChange={(e) => handleSearchChange(e.target.value)}
           placeholder="Filter by keyword (e.g. portrait, cyberpunk, 35mm, anime)..."
-          className="w-full pl-12 pr-10 py-3.5 bg-dark-900 border border-slate-700/80 rounded-2xl text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 shadow-xl transition-all"
+          className="w-full pl-12 pr-10 py-3.5 bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-slate-900 dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder-slate-400 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 shadow-sm dark:shadow-xl transition-all"
         />
         {searchQuery && (
           <button
             onClick={clearSearch}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 rounded-lg"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -146,14 +146,14 @@ export const ExplorePage: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="py-20 text-center bg-dark-900/50 rounded-3xl border border-slate-800/80 p-8 my-8 max-w-md mx-auto">
-          <p className="text-base font-semibold text-white mb-2">No matching prompts found</p>
-          <p className="text-xs text-slate-400 mb-5">
+        <div className="py-20 text-center bg-white dark:bg-dark-900/50 rounded-3xl border border-slate-200 dark:border-slate-800/80 p-8 my-8 max-w-md mx-auto shadow-sm dark:shadow-none">
+          <p className="text-base font-semibold text-slate-900 dark:text-white mb-2">No matching prompts found</p>
+          <p className="text-xs text-slate-600 dark:text-slate-400 mb-5">
             Try adjusting your search terms or resetting filters.
           </p>
           <button
             onClick={handleResetFilters}
-            className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold"
+            className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold cursor-pointer"
           >
             Clear All Filters
           </button>
