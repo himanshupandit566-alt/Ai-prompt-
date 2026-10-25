@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Heart, Settings, PlusCircle, Compass, Grid, X, LogIn } from 'lucide-react';
+import { Search, Heart, Settings, PlusCircle, Compass, X, LogIn } from 'lucide-react';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
 import { playClickSound, playPopSound } from '../utils/sound';
@@ -81,18 +81,6 @@ export const Navbar: React.FC = () => {
               }`}
             >
               <Compass className="w-4 h-4" /> Explore
-            </Link>
-
-            <Link
-              to="/category/all"
-              onClick={() => playClickSound()}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive('/category')
-                  ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850'
-              }`}
-            >
-              <Grid className="w-4 h-4" /> Categories
             </Link>
 
             <Link

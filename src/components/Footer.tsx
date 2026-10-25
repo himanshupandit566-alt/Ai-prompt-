@@ -47,9 +47,6 @@ export const Footer: React.FC = () => {
                 <Link to="/explore" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Explore Gallery</Link>
               </li>
               <li>
-                <Link to="/category/all" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Browse Categories</Link>
-              </li>
-              <li>
                 <Link to="/favorites" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">My Favorites</Link>
               </li>
               <li>

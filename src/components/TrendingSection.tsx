@@ -65,7 +65,7 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
       {/* Horizontal Carousel */}
       <div
         ref={scrollRef}
-        className="flex items-stretch gap-4 overflow-x-auto scrollbar-none px-4 sm:px-0 pb-2 scroll-smooth"
+        className="flex items-start gap-4 overflow-x-auto scrollbar-none px-4 sm:px-0 pb-2 scroll-smooth"
       >
         {trendingPrompts.map((prompt) => {
           const favorited = isFavorite(prompt.id);
@@ -73,7 +73,7 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
           return (
             <div
               key={prompt.id}
-              className="group shrink-0 w-64 sm:w-72 bg-white dark:bg-dark-900 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-purple-500/40 overflow-hidden flex flex-col justify-between shadow-sm dark:shadow-lg hover:shadow-glow-purple transition-all duration-300"
+              className="group shrink-0 w-60 sm:w-64 bg-white dark:bg-dark-900 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-purple-500/40 overflow-hidden flex flex-col justify-start h-fit shadow-sm dark:shadow-lg hover:shadow-glow-purple transition-all duration-300"
             >
               <Link
                 to={`/prompt/${prompt.id}`}

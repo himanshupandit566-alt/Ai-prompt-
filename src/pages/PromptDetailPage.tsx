@@ -431,7 +431,7 @@ export const PromptDetailPage: React.FC = () => {
               <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" /> More in {prompt.category}
             </h2>
             <Link
-              to={`/category/${prompt.category.toLowerCase().replace(/\s+/g, '-')}`}
+              to={`/explore?q=${encodeURIComponent(prompt.category)}`}
               onClick={() => playClickSound()}
               className="text-xs sm:text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-semibold"
             >

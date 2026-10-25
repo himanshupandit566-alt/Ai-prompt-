@@ -146,7 +146,7 @@ export const ExplorePage: React.FC = () => {
 
       {/* Grid */}
       {filteredPrompts.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5 items-start">
           {filteredPrompts.map((prompt, idx) => (
             <ImageCard key={prompt.id} prompt={prompt} priority={idx < 6} />
           ))}

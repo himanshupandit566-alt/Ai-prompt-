@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -14,7 +14,6 @@ import { HomePage } from './pages/HomePage';
 import { ExplorePage } from './pages/ExplorePage';
 import { PromptDetailPage } from './pages/PromptDetailPage';
 import { FavoritesPage } from './pages/FavoritesPage';
-import { CategoryPage } from './pages/CategoryPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AdminPage } from './pages/AdminPage';
 import { WelcomePage } from './pages/WelcomePage';
@@ -103,7 +102,8 @@ const AppContent: React.FC = () => {
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/prompt/:id" element={<PromptDetailPage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
-            <Route path="/category/:slug" element={<CategoryPage />} />
+            <Route path="/category/:slug" element={<Navigate to="/explore" replace />} />
+            <Route path="/category" element={<Navigate to="/explore" replace />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFoundPage />} />
