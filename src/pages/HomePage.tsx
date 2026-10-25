@@ -12,7 +12,7 @@ export const HomePage: React.FC = () => {
   const { allPrompts } = useFavorites();
   const [selectedCategory, setSelectedCategory] = useState<CategoryName>('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortOption, setSortOption] = useState<SortOption>('featured');
+  const [sortOption, setSortOption] = useState<SortOption>('latest');
   const [selectedRatio, setSelectedRatio] = useState('All');
   const [selectedTool, setSelectedTool] = useState('All Tools');
 
@@ -45,15 +45,19 @@ export const HomePage: React.FC = () => {
       }
       return true;
     }).sort((a, b) => {
+      if (sortOption === 'latest') {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
       if (sortOption === 'featured') {
         if (a.featured && !b.featured) return -1;
         if (!a.featured && b.featured) return 1;
+        const timeDiff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        if (timeDiff !== 0) return timeDiff;
         return b.popularity - a.popularity;
       }
       if (sortOption === 'popular') {
-        return b.popularity - a.popularity;
-      }
-      if (sortOption === 'latest') {
+        const popDiff = b.popularity - a.popularity;
+        if (popDiff !== 0) return popDiff;
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
       if (sortOption === 'alphabetical') {
@@ -68,7 +72,7 @@ export const HomePage: React.FC = () => {
     setSearchQuery('');
     setSelectedRatio('All');
     setSelectedTool('All Tools');
-    setSortOption('featured');
+    setSortOption('latest');
   };
 
   const hasActiveFilters =

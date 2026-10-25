@@ -14,7 +14,7 @@ export const ExplorePage: React.FC = () => {
   const queryParam = searchParams.get('q') || '';
   const [searchQuery, setSearchQuery] = useState(queryParam);
   const [selectedCategory, setSelectedCategory] = useState<CategoryName>('All');
-  const [sortOption, setSortOption] = useState<SortOption>('popular');
+  const [sortOption, setSortOption] = useState<SortOption>('latest');
   const [selectedRatio, setSelectedRatio] = useState('All');
   const [selectedTool, setSelectedTool] = useState('All Tools');
 
@@ -44,7 +44,7 @@ export const ExplorePage: React.FC = () => {
     clearSearch();
     setSelectedRatio('All');
     setSelectedTool('All Tools');
-    setSortOption('popular');
+    setSortOption('latest');
   };
 
   const filteredPrompts = useMemo(() => {
@@ -63,13 +63,19 @@ export const ExplorePage: React.FC = () => {
       }
       return true;
     }).sort((a, b) => {
-      if (sortOption === 'popular') return b.popularity - a.popularity;
+      if (sortOption === 'latest') {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
       if (sortOption === 'featured') {
         if (a.featured && !b.featured) return -1;
         if (!a.featured && b.featured) return 1;
+        const timeDiff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        if (timeDiff !== 0) return timeDiff;
         return b.popularity - a.popularity;
       }
-      if (sortOption === 'latest') {
+      if (sortOption === 'popular') {
+        const popDiff = b.popularity - a.popularity;
+        if (popDiff !== 0) return popDiff;
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
       if (sortOption === 'alphabetical') return a.title.localeCompare(b.title);

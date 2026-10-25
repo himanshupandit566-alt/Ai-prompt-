@@ -25,7 +25,7 @@ import {
 export const PromptDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { allPrompts, isFavorite, toggleFavorite, showToast } = useFavorites();
+  const { allPrompts, isFavorite, toggleFavorite, showToast, isFirestoreLoading } = useFavorites();
   const { isAuthenticated } = useAuth();
 
   const [copiedPrompt, setCopiedPrompt] = useState(false);
@@ -34,6 +34,18 @@ export const PromptDetailPage: React.FC = () => {
 
   // Find prompt
   const prompt = allPrompts.find((p) => p.id === id);
+
+  // While Firestore prompts are initially loading, show a loading placeholder
+  if (isFirestoreLoading && !prompt) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
+        <div className="w-10 h-10 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mb-4" />
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
+          Loading prompt details...
+        </p>
+      </div>
+    );
+  }
 
   // If prompt not found, render user-friendly error state
   if (!prompt) {

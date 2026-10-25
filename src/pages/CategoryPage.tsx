@@ -11,7 +11,7 @@ export const CategoryPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { allPrompts } = useFavorites();
 
-  const [sortOption, setSortOption] = useState<SortOption>('featured');
+  const [sortOption, setSortOption] = useState<SortOption>('latest');
   const [selectedRatio, setSelectedRatio] = useState('All');
   const [selectedTool, setSelectedTool] = useState('All Tools');
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,13 +43,19 @@ export const CategoryPage: React.FC = () => {
       }
       return true;
     }).sort((a, b) => {
+      if (sortOption === 'latest') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       if (sortOption === 'featured') {
         if (a.featured && !b.featured) return -1;
         if (!a.featured && b.featured) return 1;
+        const timeDiff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        if (timeDiff !== 0) return timeDiff;
         return b.popularity - a.popularity;
       }
-      if (sortOption === 'popular') return b.popularity - a.popularity;
-      if (sortOption === 'latest') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      if (sortOption === 'popular') {
+        const popDiff = b.popularity - a.popularity;
+        if (popDiff !== 0) return popDiff;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
       if (sortOption === 'alphabetical') return a.title.localeCompare(b.title);
       return 0;
     });
@@ -59,7 +65,7 @@ export const CategoryPage: React.FC = () => {
     setSelectedRatio('All');
     setSelectedTool('All Tools');
     setSearchQuery('');
-    setSortOption('featured');
+    setSortOption('latest');
   };
 
   const hasActiveFilters =

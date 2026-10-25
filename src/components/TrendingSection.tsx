@@ -13,9 +13,8 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
   const { isFavorite, toggleFavorite } = useFavorites();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const trendingPrompts = prompts
-    .filter((p) => p.featured || p.popularity > 8000)
-    .sort((a, b) => b.popularity - a.popularity)
+  const popularCandidates = prompts.filter((p) => p.featured || p.popularity > 8000);
+  const trendingPrompts = (popularCandidates.length > 0 ? popularCandidates : prompts)
     .slice(0, 10);
 
   const scroll = (direction: 'left' | 'right') => {
