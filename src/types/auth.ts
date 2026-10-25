@@ -7,6 +7,7 @@ export interface UserProfile {
   pushNotifications: boolean;
   createdAt: string;
   bio?: string;
+  unlockedPrompts?: string[];
 }
 
 export interface AuthState {

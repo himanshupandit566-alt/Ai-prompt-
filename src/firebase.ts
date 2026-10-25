@@ -26,7 +26,9 @@ import {
   getDoc,
   deleteDoc,
   collection,
-  onSnapshot
+  onSnapshot,
+  arrayUnion,
+  updateDoc
 } from 'firebase/firestore';
 
 export interface FirebaseClientConfig {
@@ -196,5 +198,7 @@ export {
   deleteDoc,
   collection,
   onSnapshot,
+  arrayUnion,
+  updateDoc,
   type FirebaseUser
 };

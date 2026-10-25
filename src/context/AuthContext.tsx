@@ -22,6 +22,8 @@ import {
   setDoc,
   getDoc,
   deleteDoc,
+  arrayUnion,
+  onSnapshot,
   FirebaseUser
 } from '../firebase';
 
@@ -40,6 +42,8 @@ interface AuthContextType {
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
   logOut: () => Promise<void>;
   deleteAccount: () => Promise<{ success: boolean; error?: string }>;
+  unlockPromptForUser: (promptId: string) => Promise<boolean>;
+  isPromptUnlocked: (promptId: string) => boolean;
 }
 
 const AUTH_STORAGE_KEY = 'fx_prompty_current_user_v3';
@@ -154,6 +158,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             pushNotifications: true,
             createdAt: new Date().toISOString().split('T')[0],
             bio: 'Creator on FX Prompty.',
+            unlockedPrompts: [],
           };
           await setDoc(userDocRef, newDoc, { merge: true });
           firestoreProfile = newDoc;
@@ -172,6 +177,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       pushNotifications: firestoreProfile.pushNotifications ?? true,
       createdAt: firestoreProfile.createdAt || new Date().toISOString().split('T')[0],
       bio: firestoreProfile.bio || 'Creator on FX Prompty.',
+      unlockedPrompts: Array.isArray(firestoreProfile.unlockedPrompts) ? firestoreProfile.unlockedPrompts : [],
     };
 
     setUser(realProfile);
@@ -204,11 +210,38 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.warn('Redirect auth result warning:', err);
       });
 
-    // 2. Real-time persistent session listener
+    // 2. Real-time persistent session listener & Firestore user doc observer
+    let userDocUnsub: (() => void) | null = null;
+
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      if (userDocUnsub) {
+        userDocUnsub();
+        userDocUnsub = null;
+      }
+
       if (fbUser) {
         try {
           await syncFirebaseUserToState(fbUser);
+
+          // Real-time listener for current user document (e.g. unlockedPrompts array updates)
+          if (db) {
+            userDocUnsub = onSnapshot(doc(db, 'users', fbUser.uid), (snap) => {
+              if (snap.exists()) {
+                const data = snap.data();
+                setUser((prev) => {
+                  if (!prev) return null;
+                  return {
+                    ...prev,
+                    displayName: data.displayName || prev.displayName,
+                    photoURL: data.photoURL || prev.photoURL,
+                    bio: data.bio ?? prev.bio,
+                    pushNotifications: data.pushNotifications ?? prev.pushNotifications,
+                    unlockedPrompts: Array.isArray(data.unlockedPrompts) ? data.unlockedPrompts : [],
+                  };
+                });
+              }
+            });
+          }
         } catch (err) {
           console.error('Error in onAuthStateChanged:', err);
         }
@@ -218,7 +251,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      if (userDocUnsub) userDocUnsub();
+      unsubscribe();
+    };
   }, []);
 
   // ========================================================
@@ -516,6 +552,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem(AUTH_STORAGE_KEY);
     localStorage.removeItem(GUEST_STORAGE_KEY);
     localStorage.removeItem('fx_prompty_welcome_dismissed');
+    localStorage.removeItem('fx_unlocked_prompts');
     setLoading(false);
   };
 
@@ -542,8 +579,51 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem(AUTH_STORAGE_KEY);
     localStorage.removeItem(GUEST_STORAGE_KEY);
     localStorage.removeItem('fx_prompty_welcome_dismissed');
+    localStorage.removeItem('fx_unlocked_prompts');
     setLoading(false);
     return { success: true };
+  };
+
+  // ========================================================
+  // 9. UNLOCK PROMPT IN FIRESTORE (users/{uid} -> unlockedPrompts: arrayUnion(promptId))
+  // ========================================================
+  const unlockPromptForUser = async (promptId: string): Promise<boolean> => {
+    if (!user || !user.uid) return false;
+
+    // 1. Optimistic state update so prompt unlocks immediately in UI
+    setUser((prev) => {
+      if (!prev) return prev;
+      const current = prev.unlockedPrompts || [];
+      if (current.includes(promptId)) return prev;
+      return {
+        ...prev,
+        unlockedPrompts: [...current, promptId],
+      };
+    });
+
+    // 2. Persist directly into Firestore user document: users/{uid}
+    if (db) {
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        await setDoc(
+          userDocRef,
+          {
+            unlockedPrompts: arrayUnion(promptId),
+          },
+          { merge: true }
+        );
+        return true;
+      } catch (err) {
+        console.error('Failed to update unlockedPrompts in Firestore:', err);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const isPromptUnlocked = (promptId: string): boolean => {
+    if (!user || !user.unlockedPrompts) return false;
+    return user.unlockedPrompts.includes(promptId);
   };
 
   return (
@@ -563,6 +643,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         changePassword,
         logOut,
         deleteAccount,
+        unlockPromptForUser,
+        isPromptUnlocked,
       }}
     >
       {children}

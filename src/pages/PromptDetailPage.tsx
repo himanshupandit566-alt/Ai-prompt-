@@ -28,28 +28,26 @@ export const PromptDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { allPrompts, isFavorite, toggleFavorite, showToast, isFirestoreLoading } = useFavorites();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated, unlockPromptForUser } = useAuth();
 
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [copiedNegative, setCopiedNegative] = useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
 
-  // Rewarded Ad Gating State
-  const [unlockedPrompts, setUnlockedPrompts] = useState<string[]>(() => {
-    try {
-      const stored = localStorage.getItem('fx_unlocked_prompts');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
-
+  // Rewarded Ad Gating Modal State
   const [adModalOpen, setAdModalOpen] = useState(false);
   const [adCountdown, setAdCountdown] = useState(5);
 
   // Find prompt
   const prompt = allPrompts.find((p) => p.id === id);
-  const isUnlocked = Boolean(prompt && unlockedPrompts.includes(prompt.id));
+
+  // Check if current logged-in user's unlockedPrompts array from Firestore contains this promptId
+  const isUnlocked = Boolean(
+    isAuthenticated &&
+      prompt &&
+      user?.unlockedPrompts &&
+      user.unlockedPrompts.includes(prompt.id)
+  );
 
   // Rewarded Ad 5-Second Countdown Timer
   useEffect(() => {
@@ -143,21 +141,13 @@ export const PromptDetailPage: React.FC = () => {
     setAdModalOpen(true);
   };
 
-  // Claim reward & unlock prompt permanently
-  const handleClaimReward = () => {
+  // Claim reward & unlock prompt in Firestore (users/{uid} -> unlockedPrompts: arrayUnion(prompt.id))
+  const handleClaimReward = async () => {
     if (!prompt) return;
     playSuccessChime();
 
-    setUnlockedPrompts((prev) => {
-      if (prev.includes(prompt.id)) return prev;
-      const next = [...prev, prompt.id];
-      try {
-        localStorage.setItem('fx_unlocked_prompts', JSON.stringify(next));
-      } catch (e) {
-        console.warn(e);
-      }
-      return next;
-    });
+    // Store unlocked prompt directly in Firestore users collection
+    await unlockPromptForUser(prompt.id);
 
     setAdModalOpen(false);
     showToast('🎉 Prompt Unlocked! Full prompt revealed & ready to copy.', 'success');
