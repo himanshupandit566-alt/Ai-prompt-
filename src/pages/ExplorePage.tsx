@@ -6,6 +6,7 @@ import { FilterSortBar } from '../components/FilterSortBar';
 import { CategoryChips } from '../components/CategoryChips';
 import { CategoryName, SortOption } from '../types/prompt';
 import { Compass, Search, X } from 'lucide-react';
+import { normalizeCategory } from '../data/categories';
 
 export const ExplorePage: React.FC = () => {
   const { allPrompts } = useFavorites();
@@ -49,7 +50,7 @@ export const ExplorePage: React.FC = () => {
 
   const filteredPrompts = useMemo(() => {
     return allPrompts.filter((prompt) => {
-      if (selectedCategory !== 'All' && prompt.category !== selectedCategory) return false;
+      if (selectedCategory !== 'All' && normalizeCategory(prompt.category) !== selectedCategory) return false;
       if (selectedRatio !== 'All' && prompt.aspectRatio !== selectedRatio) return false;
       if (selectedTool !== 'All Tools' && !prompt.compatibleTools.includes(selectedTool)) return false;
       if (searchQuery.trim()) {
@@ -57,7 +58,7 @@ export const ExplorePage: React.FC = () => {
         const matchTitle = prompt.title.toLowerCase().includes(q);
         const matchPrompt = prompt.prompt.toLowerCase().includes(q);
         const matchDesc = prompt.description.toLowerCase().includes(q);
-        const matchCat = prompt.category.toLowerCase().includes(q);
+        const matchCat = (prompt.category + ' ' + normalizeCategory(prompt.category)).toLowerCase().includes(q);
         const matchTags = prompt.tags.some((t) => t.toLowerCase().includes(q));
         if (!matchTitle && !matchPrompt && !matchDesc && !matchCat && !matchTags) return false;
       }

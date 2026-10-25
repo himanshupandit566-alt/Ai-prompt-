@@ -4,6 +4,7 @@ import { PromptItem } from '../types/prompt';
 import { useFavorites } from '../context/FavoritesContext';
 import { Flame, Heart, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { playClickSound, playPopSound } from '../utils/sound';
+import { normalizeCategory } from '../data/categories';
 
 interface TrendingSectionProps {
   prompts: PromptItem[];
@@ -46,14 +47,20 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
         {/* Scroll Controls */}
         <div className="flex items-center gap-2">
           <button
-            onClick={() => scroll('left')}
+            onClick={(e) => {
+              e.stopPropagation();
+              scroll('left');
+            }}
             aria-label="Scroll trending left"
             className="w-8 h-8 rounded-full bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-800 transition-colors cursor-pointer shadow-sm dark:shadow-none"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
-            onClick={() => scroll('right')}
+            onClick={(e) => {
+              e.stopPropagation();
+              scroll('right');
+            }}
             aria-label="Scroll trending right"
             className="w-8 h-8 rounded-full bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-800 transition-colors cursor-pointer shadow-sm dark:shadow-none"
           >
@@ -77,7 +84,10 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
             >
               <Link
                 to={`/prompt/${prompt.id}`}
-                onClick={() => playClickSound()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  playClickSound();
+                }}
                 className="block relative aspect-[4/5] overflow-hidden bg-slate-100 dark:bg-dark-950"
               >
                 <img
@@ -115,7 +125,7 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
                 {/* Title and Category over image */}
                 <div className="absolute bottom-2.5 left-2.5 right-2.5">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-300">
-                    {prompt.category}
+                    {normalizeCategory(prompt.category)}
                   </span>
                   <h3 className="text-sm font-bold text-white line-clamp-1 drop-shadow-md">
                     {prompt.title}
@@ -130,7 +140,10 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ prompts }) => 
                 </span>
                 <Link
                   to={`/prompt/${prompt.id}`}
-                  onClick={() => playClickSound()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    playClickSound();
+                  }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-600/15 hover:bg-purple-100 dark:hover:bg-purple-600/25 border border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-300 hover:text-purple-900 dark:hover:text-white text-xs font-semibold transition-all group/btn"
                 >
                   <span>View Details</span>

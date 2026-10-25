@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { PromptItem, CategoryName, AspectRatio } from '../types/prompt';
+import { PromptItem, AspectRatio } from '../types/prompt';
 import { INITIAL_PROMPTS } from '../data/prompts';
+import { normalizeCategory } from '../data/categories';
 import { useAuth } from './AuthContext';
 import { db, collection, onSnapshot, doc, setDoc, deleteDoc } from '../firebase';
 
@@ -69,8 +70,9 @@ const mapFirestoreDocToPrompt = (id: string, data: any): PromptItem => {
     ''
   ).trim() || undefined;
 
-  // Category
-  const category = (data.category || data.categoryName || 'Cinematic Portraits') as CategoryName;
+  // Category normalized to clean canonical categories
+  const rawCat = data.category || data.categoryName || 'Portraits';
+  const category = normalizeCategory(rawCat);
 
   // Description
   const description = (
@@ -319,8 +321,16 @@ export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   // Primary source: Firestore prompts collection.
   // Fallback: Local custom prompts + INITIAL_PROMPTS if Firestore is empty or offline.
-  const fallbackPrompts: PromptItem[] = [...customPrompts, ...INITIAL_PROMPTS];
-  const allPrompts: PromptItem[] = firestorePrompts.length > 0 ? firestorePrompts : fallbackPrompts;
+  // Normalize categories across all sources into the 5 canonical categories.
+  const fallbackPrompts: PromptItem[] = [...customPrompts, ...INITIAL_PROMPTS].map((p) => ({
+    ...p,
+    category: normalizeCategory(p.category),
+  }));
+  const rawPrompts = firestorePrompts.length > 0 ? firestorePrompts : fallbackPrompts;
+  const allPrompts: PromptItem[] = rawPrompts.map((p) => ({
+    ...p,
+    category: normalizeCategory(p.category),
+  }));
 
   const addCustomPrompt = async (prompt: PromptItem) => {
     // 1. Update local custom prompts immediately

@@ -24,7 +24,10 @@ export const BottomNav: React.FC = () => {
               key={item.to}
               to={item.to}
               end={item.exact}
-              onClick={() => playPopSound()}
+              onClick={(e) => {
+                e.stopPropagation();
+                playPopSound();
+              }}
               className={({ isActive }) =>
                 `flex flex-col items-center justify-center py-1.5 px-2 rounded-2xl transition-all relative ${
                   isActive

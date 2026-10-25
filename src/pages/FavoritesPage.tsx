@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
+import { normalizeCategory } from '../data/categories';
 import { copyToClipboard } from '../utils/clipboard';
 import { exportPromptToTxt } from '../utils/exportPrompt';
 import {
@@ -58,7 +59,7 @@ export const FavoritesPage: React.FC = () => {
 
       const entries = savedPrompts.map((p, idx) => {
         return [
-          `#${idx + 1}. ${p.title} (${p.category})`,
+          `#${idx + 1}. ${p.title} (${normalizeCategory(p.category)})`,
           `Aspect Ratio: ${p.aspectRatio}`,
           `Tools: ${p.compatibleTools.join(', ')}`,
           'PROMPT:',
@@ -145,7 +146,7 @@ export const FavoritesPage: React.FC = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
                     <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[10px] font-semibold text-purple-300 border border-white/10 uppercase tracking-wider">
-                      {prompt.category}
+                      {normalizeCategory(prompt.category)}
                     </span>
                     <button
                       onClick={(e) => {

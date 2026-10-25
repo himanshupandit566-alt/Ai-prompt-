@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useFavorites } from '../context/FavoritesContext';
-import { CATEGORIES } from '../data/categories';
+import { CATEGORIES, normalizeCategory } from '../data/categories';
 import { ImageCard } from '../components/ImageCard';
 import { FilterSortBar } from '../components/FilterSortBar';
 import { SortOption } from '../types/prompt';
@@ -23,8 +23,8 @@ export const CategoryPage: React.FC = () => {
 
   const filteredPrompts = useMemo(() => {
     return allPrompts.filter((prompt) => {
-      // If not 'All', match exact category name
-      if (currentCategory.name !== 'All' && prompt.category !== currentCategory.name) {
+      // If not 'All', match exact category name with normalization
+      if (currentCategory.name !== 'All' && normalizeCategory(prompt.category) !== currentCategory.name) {
         return false;
       }
       if (selectedRatio !== 'All' && prompt.aspectRatio !== selectedRatio) {

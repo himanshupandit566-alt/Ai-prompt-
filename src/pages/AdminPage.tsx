@@ -12,7 +12,7 @@ export const AdminPage: React.FC = () => {
   // Form State
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<CategoryName>('Cinematic Portraits');
+  const [category, setCategory] = useState<CategoryName>('Portraits');
   const [imageUrl, setImageUrl] = useState('');
   const [promptText, setPromptText] = useState('');
   const [negativePrompt, setNegativePrompt] = useState('');

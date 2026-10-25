@@ -6,6 +6,7 @@ import { copyToClipboard } from '../utils/clipboard';
 import { exportPromptToTxt } from '../utils/exportPrompt';
 import { sharePrompt } from '../utils/sharePrompt';
 import { playClickSound, playPopSound, playSuccessChime } from '../utils/sound';
+import { normalizeCategory } from '../data/categories';
 import { ImageCard } from '../components/ImageCard';
 import {
   ArrowLeft,
@@ -137,7 +138,7 @@ export const PromptDetailPage: React.FC = () => {
 
   // Related prompts from the same category
   const relatedPrompts = allPrompts
-    .filter((p) => p.category === prompt.category && p.id !== prompt.id)
+    .filter((p) => normalizeCategory(p.category) === normalizeCategory(prompt.category) && p.id !== prompt.id)
     .slice(0, 4);
 
   return (
@@ -248,7 +249,7 @@ export const PromptDetailPage: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400 font-semibold mb-2">
               <span className="px-2.5 py-0.5 rounded-full bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20">
-                {prompt.category}
+                {normalizeCategory(prompt.category)}
               </span>
               <span>•</span>
               <span className="text-slate-500 dark:text-slate-400 font-normal">Aspect Ratio {prompt.aspectRatio}</span>
@@ -428,11 +429,14 @@ export const PromptDetailPage: React.FC = () => {
         <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800/80">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" /> More in {prompt.category}
+              <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" /> More in {normalizeCategory(prompt.category)}
             </h2>
             <Link
-              to={`/explore?q=${encodeURIComponent(prompt.category)}`}
-              onClick={() => playClickSound()}
+              to={`/explore?q=${encodeURIComponent(normalizeCategory(prompt.category))}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                playClickSound();
+              }}
               className="text-xs sm:text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-semibold"
             >
               View all →

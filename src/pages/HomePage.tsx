@@ -7,6 +7,7 @@ import { FilterSortBar } from '../components/FilterSortBar';
 import { ImageCard } from '../components/ImageCard';
 import { CategoryName, SortOption } from '../types/prompt';
 import { Sparkles, Compass, AlertCircle } from 'lucide-react';
+import { normalizeCategory } from '../data/categories';
 
 export const HomePage: React.FC = () => {
   const { allPrompts } = useFavorites();
@@ -19,8 +20,8 @@ export const HomePage: React.FC = () => {
   // Filter & Sort Logic
   const filteredPrompts = useMemo(() => {
     return allPrompts.filter((prompt) => {
-      // Category filter
-      if (selectedCategory !== 'All' && prompt.category !== selectedCategory) {
+      // Category filter with normalization
+      if (selectedCategory !== 'All' && normalizeCategory(prompt.category) !== selectedCategory) {
         return false;
       }
       // Aspect Ratio filter
@@ -37,7 +38,7 @@ export const HomePage: React.FC = () => {
         const matchTitle = prompt.title.toLowerCase().includes(query);
         const matchPrompt = prompt.prompt.toLowerCase().includes(query);
         const matchDesc = prompt.description.toLowerCase().includes(query);
-        const matchCategory = prompt.category.toLowerCase().includes(query);
+        const matchCategory = (prompt.category + ' ' + normalizeCategory(prompt.category)).toLowerCase().includes(query);
         const matchTags = prompt.tags.some((t) => t.toLowerCase().includes(query));
         if (!matchTitle && !matchPrompt && !matchDesc && !matchCategory && !matchTags) {
           return false;

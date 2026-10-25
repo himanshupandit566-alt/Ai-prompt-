@@ -1,4 +1,4 @@
-import { CategoryInfo } from '../types/prompt';
+import { CategoryInfo, CleanCategoryName } from '../types/prompt';
 
 export const CATEGORIES: CategoryInfo[] = [
   {
@@ -8,115 +8,148 @@ export const CATEGORIES: CategoryInfo[] = [
     iconName: 'Sparkles',
   },
   {
-    name: 'Cinematic Portraits',
-    slug: 'cinematic-portraits',
-    description: 'Dramatic lighting, anamorphic lenses, moody shadows, and blockbuster character portraits.',
-    iconName: 'Film',
-    featuredImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    name: 'Realistic Photography',
-    slug: 'realistic-photography',
-    description: 'Hyper-realistic raw camera aesthetic, natural skin textures, and candid moment captures.',
-    iconName: 'Camera',
+    name: 'Portraits',
+    slug: 'portraits',
+    description: 'Dramatic lighting, realistic photography, romantic chemistry, and expressive human studio portraits.',
+    iconName: 'User',
     featuredImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
   },
   {
-    name: 'Fashion',
-    slug: 'fashion',
-    description: 'High-end runway styling, avant-garde couture, editorial poses, and magazine covers.',
-    iconName: 'Shirt',
-    featuredImage: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    name: 'Luxury',
-    slug: 'luxury',
-    description: 'Opulent penthouses, mega-yachts, Swiss watches, champagne lifestyle, and billionaire aesthetics.',
-    iconName: 'Crown',
-    featuredImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    name: 'Couple Portraits',
-    slug: 'couple-portraits',
-    description: 'Intimate relationship captures, candid chemistry, and emotional two-person portraits.',
-    iconName: 'Users',
-    featuredImage: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    name: 'Romantic',
-    slug: 'romantic',
-    description: 'Soft pastel hues, dreamy golden-hour light, gentle bokeh, and poetic atmosphere.',
-    iconName: 'Heart',
-    featuredImage: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    name: 'Anime',
-    slug: 'anime',
-    description: 'Makoto Shinkai style skies, Studio Ghibli aesthetics, vivid cel-shading, and manga art.',
+    name: 'Anime & 3D',
+    slug: 'anime-3d',
+    description: 'Studio Ghibli style skies, vibrant cel-shading, isometric 3D renders, and gaming concept art.',
     iconName: 'Palette',
     featuredImage: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80',
   },
   {
+    name: 'Fashion',
+    slug: 'fashion',
+    description: 'High-end runway styling, avant-garde couture, editorial magazine poses, and luxury aesthetics.',
+    iconName: 'Shirt',
+    featuredImage: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80',
+  },
+  {
     name: 'Fantasy',
     slug: 'fantasy',
-    description: 'Mythical beasts, ethereal elven realms, glowing arcane magic, and dragon riders.',
+    description: 'Mythical beasts, ethereal elven realms, glowing arcane magic, and otherworldly dreamscapes.',
     iconName: 'Wand2',
     featuredImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
   },
   {
-    name: 'Nature',
-    slug: 'nature',
-    description: 'Breathtaking alpine ranges, misty rainforests, bioluminescent waters, and serene landscapes.',
-    iconName: 'Trees',
-    featuredImage: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    name: 'Cars',
-    slug: 'cars',
-    description: 'Exotic supercars, sleek hypercar concepts, carbon fiber details, and wet-asphalt reflections.',
-    iconName: 'Car',
-    featuredImage: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    name: 'Gaming',
-    slug: 'gaming',
-    description: 'Unreal Engine 5 concept art, cybernetic warriors, boss fights, and futuristic arenas.',
-    iconName: 'Gamepad2',
-    featuredImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    name: '3D Art',
-    slug: '3d-art',
-    description: 'Claymation renders, Octane Render glass refraction, isometric dioramas, and stylized 3D.',
-    iconName: 'Box',
-    featuredImage: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    name: 'Vintage',
-    slug: 'vintage',
-    description: '35mm grain, Kodak Portra warmth, retro Polaroid tones, and nostalgic 1970s-90s film look.',
-    iconName: 'History',
-    featuredImage: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    name: 'Professional Profile',
-    slug: 'professional-profile',
-    description: 'LinkedIn-ready corporate headshots, executive studio portraits, and clean modern personal branding.',
-    iconName: 'Briefcase',
-    featuredImage: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    name: 'Festival',
-    slug: 'festival',
-    description: 'Vibrant cultural celebrations, Diwali lights, Holi gulal explosions, carnival parades, and lanterns.',
-    iconName: 'Flame',
-    featuredImage: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    name: 'Wallpapers',
-    slug: 'wallpapers',
-    description: 'Ultra-wide 8K desktop backgrounds, minimal OLED phone lockscreeens, and atmospheric vistas.',
+    name: 'Wallpaper',
+    slug: 'wallpaper',
+    description: 'Ultra-wide 8K landscapes, serene natural vistas, sleek supercars, and high-res wallpapers.',
     iconName: 'Image',
     featuredImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
   },
 ];
+
+/**
+ * Normalizes any category string (from Firestore, legacy prompts, or input)
+ * into one of the 5 clean categories:
+ * 1. Portraits
+ * 2. Anime & 3D
+ * 3. Fashion
+ * 4. Fantasy
+ * 5. Wallpaper
+ */
+export const normalizeCategory = (category?: string | null): CleanCategoryName => {
+  if (!category) return 'Portraits';
+  const clean = category.trim().toLowerCase();
+
+  // Explicit mappings from requirements:
+  // - 'Cinematic Portrait', 'Cinematic Portraits', 'Realistic Photography', 'Couple portraits', 'Romantic' -> 'Portraits'
+  // - 'Anime', 'Gaming', '3d art' -> 'Anime & 3D'
+  // - 'Luxury', 'Fashion' -> 'Fashion'
+  // - 'Car', 'Natural', 'Wallpaper' -> 'Wallpaper'
+  switch (clean) {
+    case 'portraits':
+    case 'portrait':
+    case 'cinematic portrait':
+    case 'cinematic portraits':
+    case 'realistic photography':
+    case 'couple portraits':
+    case 'couple portrait':
+    case 'romantic':
+    case 'professional profile':
+    case 'vintage':
+    case 'festival':
+      return 'Portraits';
+
+    case 'anime & 3d':
+    case 'anime and 3d':
+    case 'anime':
+    case 'gaming':
+    case '3d art':
+    case '3d':
+    case '3d-art':
+      return 'Anime & 3D';
+
+    case 'fashion':
+    case 'luxury':
+      return 'Fashion';
+
+    case 'fantasy':
+      return 'Fantasy';
+
+    case 'wallpaper':
+    case 'wallpapers':
+    case 'car':
+    case 'cars':
+    case 'natural':
+    case 'nature':
+      return 'Wallpaper';
+  }
+
+  // Fallback pattern matching for loose / edge case strings:
+  if (
+    clean.includes('portrait') ||
+    clean.includes('photo') ||
+    clean.includes('romantic') ||
+    clean.includes('couple') ||
+    clean.includes('profile') ||
+    clean.includes('vintage') ||
+    clean.includes('festival')
+  ) {
+    return 'Portraits';
+  }
+
+  if (
+    clean.includes('anime') ||
+    clean.includes('gaming') ||
+    clean.includes('game') ||
+    clean.includes('3d') ||
+    clean.includes('cgi')
+  ) {
+    return 'Anime & 3D';
+  }
+
+  if (
+    clean.includes('fashion') ||
+    clean.includes('luxury') ||
+    clean.includes('couture')
+  ) {
+    return 'Fashion';
+  }
+
+  if (
+    clean.includes('wallpaper') ||
+    clean.includes('car') ||
+    clean.includes('nature') ||
+    clean.includes('natural') ||
+    clean.includes('landscape')
+  ) {
+    return 'Wallpaper';
+  }
+
+  if (
+    clean.includes('fantasy') ||
+    clean.includes('magic') ||
+    clean.includes('myth')
+  ) {
+    return 'Fantasy';
+  }
+
+  // Safe default
+  return 'Portraits';
+};

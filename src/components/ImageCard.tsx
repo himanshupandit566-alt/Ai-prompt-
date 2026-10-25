@@ -4,6 +4,7 @@ import { Heart, Sparkles, Image as ImageIcon, Eye, ArrowRight } from 'lucide-rea
 import { PromptItem } from '../types/prompt';
 import { useFavorites } from '../context/FavoritesContext';
 import { playClickSound, playPopSound } from '../utils/sound';
+import { normalizeCategory } from '../data/categories';
 
 interface ImageCardProps {
   prompt: PromptItem;
@@ -24,7 +25,10 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
     toggleFavorite(prompt.id);
   };
 
-  const handleCardClick = () => {
+  const handleCardClick = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     playClickSound();
   };
 
@@ -52,7 +56,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
                 {prompt.title}
               </p>
               <span className="text-[9px] text-purple-600 dark:text-purple-400 mt-1 uppercase tracking-wider">
-                {prompt.category}
+                {normalizeCategory(prompt.category)}
               </span>
             </div>
           ) : (
@@ -111,7 +115,7 @@ export const ImageCard: React.FC<ImageCardProps> = ({ prompt, priority = false }
       {/* Card Details: Compact metadata immediately followed by View Details action */}
       <div className="p-3 flex flex-col justify-start gap-1.5 bg-white dark:bg-dark-900">
         <div className="flex items-center justify-between text-[11px] font-medium text-purple-600 dark:text-purple-400">
-          <span className="truncate max-w-[70%]">{prompt.category}</span>
+          <span className="truncate max-w-[70%]">{normalizeCategory(prompt.category)}</span>
           {prompt.popularity > 0 && (
             <span className="text-slate-500 dark:text-slate-400 text-[10px] shrink-0 font-normal flex items-center gap-0.5">
               <Eye className="w-2.5 h-2.5 text-slate-400 dark:text-slate-500" />

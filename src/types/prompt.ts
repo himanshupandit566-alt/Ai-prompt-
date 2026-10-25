@@ -1,23 +1,31 @@
 export type AspectRatio = '1:1' | '4:5' | '3:4' | '9:16' | '16:9' | '2:3' | '3:2' | '21:9';
 
+export type CleanCategoryName =
+  | 'Portraits'
+  | 'Anime & 3D'
+  | 'Fashion'
+  | 'Fantasy'
+  | 'Wallpaper';
+
 export type CategoryName =
   | 'All'
+  | CleanCategoryName
+  // Legacy categories retained for backward compatibility:
   | 'Cinematic Portraits'
   | 'Realistic Photography'
-  | 'Fashion'
-  | 'Luxury'
   | 'Couple Portraits'
   | 'Romantic'
   | 'Anime'
-  | 'Fantasy'
-  | 'Nature'
-  | 'Cars'
   | 'Gaming'
   | '3D Art'
+  | 'Luxury'
+  | 'Cars'
+  | 'Nature'
+  | 'Wallpapers'
   | 'Vintage'
   | 'Professional Profile'
   | 'Festival'
-  | 'Wallpapers';
+  | (string & {});
 
 export interface PromptItem {
   id: string;

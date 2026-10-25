@@ -2,6 +2,17 @@
 // Generates loud, crisp, tactile click/pop sounds without any external audio file dependency
 
 let audioCtx: AudioContext | null = null;
+let lastPlayTime = 0;
+const AUDIO_COOLDOWN_MS = 100; // Minimum threshold to prevent rapid duplicate/echo triggers
+
+const shouldThrottleSound = (): boolean => {
+  const now = Date.now();
+  if (now - lastPlayTime < AUDIO_COOLDOWN_MS) {
+    return true;
+  }
+  lastPlayTime = now;
+  return false;
+};
 
 export const isSoundEnabled = (): boolean => {
   if (typeof window === 'undefined') return false;
@@ -36,7 +47,7 @@ const getAudioContext = (): AudioContext | null => {
  * Audible & tactile on phone and laptop speakers
  */
 export const playClickSound = (volume: number = 0.35) => {
-  if (!isSoundEnabled()) return;
+  if (!isSoundEnabled() || shouldThrottleSound()) return;
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
@@ -70,7 +81,7 @@ export const playClickSound = (volume: number = 0.35) => {
  * Perfect for modal opens, favorite toggles, and tab switches
  */
 export const playPopSound = (volume: number = 0.38) => {
-  if (!isSoundEnabled()) return;
+  if (!isSoundEnabled() || shouldThrottleSound()) return;
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
@@ -102,7 +113,7 @@ export const playPopSound = (volume: number = 0.38) => {
  * Vibrant high-tech chime sound for success actions (like prompt copy)
  */
 export const playSuccessChime = (volume: number = 0.32) => {
-  if (!isSoundEnabled()) return;
+  if (!isSoundEnabled() || shouldThrottleSound()) return;
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
